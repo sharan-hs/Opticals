@@ -1,6 +1,6 @@
 import React from "react";
 import "./Footer.css";
-import logo from "../../Assets/logo.png";
+import logo from "../../Assets/logo.webp";
 import paymentIcon from "../../Assets/paymentIcon.png";
 import { FaFacebookF } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
@@ -34,10 +34,13 @@ const Footer = () => {
               <img src={logo} alt="" Z />
             </div>
 
-            <p>1418 River Drive, Suite 35 Cottonhall, CA 9622 United States</p>
+            <p>
+              476A, Siddhaiah Puranik Road, 3rd Block, Sharada Colony, West of
+              Chord Road, 3rd Stage, Basaveshwar Nagar, Bengaluru, 560079
+            </p>
 
             <div className="footer_address">
-              <strong> sale@uomo.com </strong>
+              <strong> vachanvijai@gmail.com </strong>
               <strong> +1 246-345-0695 </strong>
             </div>
 
@@ -139,8 +142,8 @@ const Footer = () => {
         </div>
         <div className="footer_bottom">
           <p>
-            © {getCurrentYear()} Uomo. All Rights Reserved | Made By{" "}
-            <a
+            © {getCurrentYear()} Vijai Opticians. All Rights Reserved
+            {/* <a
               href="https://github.com/shakti177"
               target="_blank"
               rel="noreferrer"
@@ -149,27 +152,8 @@ const Footer = () => {
               Shakti Tamrakar
             </a>{" "}
             with ❤️
+          </p> */}
           </p>
-          <div className="footerLangCurrency">
-            <div className="footerLang">
-              <p>Language</p>
-              <select name="language" id="language">
-                <option value="english">United States | English</option>
-                <option value="Hindi">Hindi</option>
-                <option value="Germany">Germany</option>
-                <option value="French">French</option>
-              </select>
-            </div>
-            <div className="footerCurrency">
-              <p>Currency</p>
-              <select name="currency" id="currency">
-                <option value="USD">$ USD</option>
-                <option value="INR">₹ INR</option>
-                <option value="EUR">€ EUR</option>
-                <option value="GBP">£ GBP</option>
-              </select>
-            </div>
-          </div>
         </div>
       </footer>
     </>

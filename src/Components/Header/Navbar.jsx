@@ -2,10 +2,10 @@ import React, { useState } from "react";
 import "./Navbar.css";
 
 import { useSelector } from "react-redux";
-
-import logo from "../../Assets/logo.png";
+import logo2 from "../../Assets/logo2.png";
+import logo3 from "../../Assets/logo3.png";
 import { Link } from "react-router-dom";
-
+import logo from "../../Assets/header-logo.png";
 import { RiMenu2Line } from "react-icons/ri";
 import { FiSearch } from "react-icons/fi";
 import { FaRegUser } from "react-icons/fa6";
@@ -44,7 +44,7 @@ const Navbar = () => {
         <div className="logoLinkContainer">
           <div className="logoContainer">
             <Link to="/" onClick={scrollToTop}>
-              <img src={logo} alt="Logo" />
+              <img height={40} src={logo2} alt="Logo" />
             </Link>
           </div>
           <div className="linkContainer">
@@ -59,11 +59,11 @@ const Navbar = () => {
                   SHOP
                 </Link>
               </li>
-              <li>
+              {/* <li>
                 <Link to="/blog" onClick={scrollToTop}>
                   BLOG
                 </Link>
-              </li>
+              </li> */}
               <li>
                 <Link to="/about" onClick={scrollToTop}>
                   ABOUT
@@ -109,7 +109,7 @@ const Navbar = () => {
           )}
           <div className="logoContainer">
             <Link to="/">
-              <img src={logo} alt="Logo" />
+              <img height={60} src={logo2} alt="Logo" />
             </Link>
           </div>
           <Link to="/cart">

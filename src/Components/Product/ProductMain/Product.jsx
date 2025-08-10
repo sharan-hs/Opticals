@@ -10,6 +10,10 @@ import product2 from "../../../Assets/ProductDetail/productdetail-2.jpg";
 import product3 from "../../../Assets/ProductDetail/productdetail-3.jpg";
 import product4 from "../../../Assets/ProductDetail/productdetail-4.jpg";
 
+import Aviator_1 from "../../../Assets/Products/aviator_1.png";
+import Aviator_2 from "../../../Assets/Products/aviator_2.png";
+import Aviator_3 from "../../../Assets/Products/aviator_3.png";
+
 import { GoChevronLeft } from "react-icons/go";
 import { GoChevronRight } from "react-icons/go";
 import { FaStar } from "react-icons/fa";
@@ -25,7 +29,7 @@ import "./Product.css";
 const Product = () => {
   // Product images Gallery
 
-  const productImg = [product1, product2, product3, product4];
+  const productImg = [Aviator_1, Aviator_2, Aviator_3];
   const [currentImg, setCurrentImg] = useState(0);
 
   const prevImg = () => {
@@ -92,7 +96,7 @@ const Product = () => {
   const handleAddToCart = () => {
     const productDetails = {
       productID: 14,
-      productName: "Lightweight Puffer Jacket",
+      productName: "Aviator Gold Glasses",
       productPrice: 90,
       frontImg: productImg[0],
       productReviews: "8k+ reviews",
@@ -136,10 +140,9 @@ const Product = () => {
         <div className="productShowCase">
           <div className="productGallery">
             <div className="productThumb">
-              <img src={product1} onClick={() => setCurrentImg(0)} alt="" />
-              <img src={product2} onClick={() => setCurrentImg(1)} alt="" />
-              <img src={product3} onClick={() => setCurrentImg(2)} alt="" />
-              <img src={product4} onClick={() => setCurrentImg(3)} alt="" />
+              <img src={Aviator_1} onClick={() => setCurrentImg(0)} alt="" />
+              <img src={Aviator_2} onClick={() => setCurrentImg(1)} alt="" />
+              <img src={Aviator_3} onClick={() => setCurrentImg(2)} alt="" />
             </div>
             <div className="productFullImg">
               <img src={productImg[currentImg]} alt="" />
@@ -171,7 +174,7 @@ const Product = () => {
               </div>
             </div>
             <div className="productName">
-              <h1>Lightweight Puffer Jacket With a Hood</h1>
+              <h1>Aviator Gold Glasses</h1>
             </div>
             <div className="productRating">
               <FaStar color="#FEC78A" size={10} />
@@ -182,7 +185,7 @@ const Product = () => {
               <p>8k+ reviews</p>
             </div>
             <div className="productPrice">
-              <h3>$90</h3>
+              <h3>₹ 9000</h3>
             </div>
             <div className="productDescription">
               <p>

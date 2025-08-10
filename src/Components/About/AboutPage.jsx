@@ -3,7 +3,9 @@ import "./AboutPage.css";
 
 import about1 from "../../Assets/About/about-1.jpg";
 import about2 from "../../Assets/About/about-2.jpg";
-
+import Shop from "../../Assets/shop.webp";
+import Shop2 from "../../Assets/shop2.webp";
+import Shop3 from "../../Assets/shop3.webp";
 import Services from "../../Components/Home/Services/Services";
 
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -22,26 +24,31 @@ const AboutPage = () => {
   return (
     <>
       <div className="aboutSection">
-        <h2>About Uomo</h2>
-        <img src={about1} alt="" />
+        <h2>About Us</h2>
+        <img src={Shop} alt="" />
         <div className="aboutContent">
           <h3>Our Story</h3>
           <h4>
-            Duis aute irure dolor in reprehenderit in voluptate velit esse
-            cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat
-            cupidatat non proident, sunt in culpa qui officia deserunt mollit
-            anim id est laborum.
+            Established in 1988, we opened our first store in Vijayanagar, since
+            then, we have been dedicated to crafting a clear vision for our
+            customers, ensuring that we help individuals with their optical
+            needs.
           </h4>
           <p>
-            Saw wherein fruitful good days image them, midst, waters upon, saw.
-            Seas lights seasons. Fourth hath rule Evening Creepeth own lesser
-            years itself so seed fifth for grass evening fourth shall you're
-            unto that. Had. Female replenish for yielding so saw all one to
-            yielding grass you'll air sea it, open waters subdue, hath. Brought
-            second Made. Be. Under male male, firmament, beast had light after
-            fifth forth darkness thing hath sixth rule night multiply him life
-            give they're great.
+            In 2005, we expanded our presence by opening our second store in
+            Basaveshwarnagar, which quickly gained recognition as a premier
+            multi-brand showroom in the area.
           </p>
+          <p>
+            As one of the oldest optical retailers, we take pride in our
+            experienced opticians, who continuously strive to adapt to the
+            evolving requirements of a new generation. Our dedication to
+            excellence in service and products ensures that we stand out in the
+            optical market, we remain committed to meeting the eyewear needs of
+            our customers while maintaining the highest standards in quality and
+            care.
+          </p>
+
           <div className="content1">
             <div className="contentBox">
               <h5>Our Mission</h5>
@@ -60,9 +67,10 @@ const AboutPage = () => {
           </div>
           <div className="content2">
             <div className="imgContent">
-              <img src={about2} alt="" />
+              <img src={Shop2} alt="" />
+              <img src={Shop3} alt="" />
             </div>
-            <div className="textContent">
+            {/* <div className="textContent">
               <h5>The Company</h5>
               <p>
                 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Amet
@@ -72,11 +80,11 @@ const AboutPage = () => {
                 nulla massa est viverra interdum. Praesent auctor nulla morbi
                 non posuere mattis. Arcu eu id maecenas cras.
               </p>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>
-      <Services />
+
       <div className="companyPartners">
         <h5>Company Partners</h5>
         <Swiper

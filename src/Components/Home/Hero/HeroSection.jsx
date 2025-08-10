@@ -7,7 +7,7 @@ import { Model } from "../../Model/Model";
 import { Link } from "react-router-dom";
 
 const HeroSection = () => {
-  const [tshirtColor, setTshirtColor] = useState("red");
+  const [tshirtColor, setTshirtColor] = useState("black");
 
   const changeColor = (color) => {
     setTshirtColor(color);
@@ -25,7 +25,7 @@ const HeroSection = () => {
       <div className="heroMain">
         <div className="sectionleft">
           <p>New Trend</p>
-          <h1>Summer Sale Stylish</h1>
+          <h1>Winter Sale Stylish</h1>
           <span>Limited Time Offer - Up to 60% off & Free Shipping</span>
           <div className="heroLink">
             <Link to="/shop" onClick={scrollToTop}>
@@ -62,16 +62,16 @@ const HeroSection = () => {
               style={{ backgroundColor: "#353933" }}
             ></button>
             <button
-              onClick={() => changeColor("#EFBD4E")}
-              style={{ backgroundColor: "#EFBD4E" }}
+              onClick={() => changeColor("green")}
+              style={{ backgroundColor: "green" }}
             ></button>
             <button
               onClick={() => changeColor("#726DE7")}
               style={{ backgroundColor: "#726DE7" }}
             ></button>
             <button
-              onClick={() => changeColor("#000000")}
-              style={{ backgroundColor: "#000000" }}
+              onClick={() => changeColor("red")}
+              style={{ backgroundColor: "red" }}
             ></button>
           </div>
         </div>

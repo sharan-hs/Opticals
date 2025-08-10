@@ -24,7 +24,6 @@ import { Toaster } from "react-hot-toast";
 const App = () => {
   return (
     <>
-      <Popup />
       <ScrollToTop />
       <BrowserRouter>
         <Header />

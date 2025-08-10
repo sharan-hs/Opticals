@@ -3,9 +3,14 @@
   font-weight: 700;
   text-transform: uppercase;
   padding: 30px;
-  padding-left: 250px;
+  /* padding-left: 250px; */
 }
 
+.contactMap {
+  padding: 40px;
+  display: flex;
+  gap: 20px;
+}
 .contactMap iframe {
   width: 100%;
   border: none;
@@ -13,7 +18,7 @@
 }
 
 .contactInfo {
-  padding: 0 250px;
+  padding: 0 40px;
   display: flex;
   flex-direction: column;
   gap: 60px;
@@ -87,6 +92,10 @@
   .contactInfo {
     padding: 0 60px;
   }
+
+  .contactMap {
+    flex-direction: column;
+  }
 }
 
 @media screen and (max-width: 450px) {
@@ -108,5 +117,9 @@
 
   .contactForm form button {
     width: 50%;
+  }
+
+  .contactMap {
+    flex-direction: column;
   }
 }
