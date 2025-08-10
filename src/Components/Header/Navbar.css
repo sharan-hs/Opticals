@@ -20,12 +20,13 @@
 
 .logoContainer {
   display: flex;
-  align-items: center;
+  align-items: self-start;
   justify-content: center;
 }
 
 .logoContainer img {
   background: none !important;
+  height: 50px;
 }
 
 .linkContainer ul {

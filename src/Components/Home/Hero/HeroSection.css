@@ -1,11 +1,12 @@
 .heroMain {
-  background-color: #f4e5e0;
+  background-color: #b5dcab;
   background-image: url("../../../Assets/slideshow-pattern.png");
   background-size: cover;
   padding: 0 160px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  height: 60vh;
 }
 
 .sectionleft {
