@@ -12,7 +12,7 @@ DEV_JWT_SECRET = "dev-only-insecure-jwt-secret"  # noqa: S105 (a known placehold
 AppEnv = Literal["development", "test", "staging", "production"]
 
 
-def _to_psycopg_url(url: str) -> str:
+def to_psycopg_url(url: str) -> str:
     """Hosts hand out postgres:// URLs; SQLAlchemy needs the psycopg 3 driver name."""
     for prefix in ("postgres://", "postgresql://"):
         if url.startswith(prefix):
@@ -47,7 +47,7 @@ class Settings(BaseSettings):
     @field_validator("database_url", "test_database_url")
     @classmethod
     def _normalise_database_url(cls, value: str | None) -> str | None:
-        return _to_psycopg_url(value) if value else None
+        return to_psycopg_url(value) if value else None
 
     @field_validator("cors_origins", mode="before")
     @classmethod

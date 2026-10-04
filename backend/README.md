@@ -78,6 +78,12 @@ Rules: never edit a migration that has been applied anywhere shared; never chang
 schema by hand; for breaking changes use expand → backfill → contract across releases. Seed
 data belongs in `app/cli.py`, not in migrations.
 
+## Deployment
+
+Vercel Python function (`vercel.json`, `api/index.py`) with Neon Postgres; production migrations run
+from GitHub Actions with `MIGRATION_DATABASE_URL` (the database's direct, unpooled URL). Full steps:
+`../docs/DEPLOYMENT.md`.
+
 ## Configuration
 
 All settings come from environment variables (see `.env.example`); locally they're read from

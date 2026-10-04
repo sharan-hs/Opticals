@@ -2,9 +2,6 @@
 name = "opticals-api"
 version = "0.1.0"
 description = "Vijai Opticians online store API (FastAPI + PostgreSQL)"
-authors = [
-    { name = "Sharan HS", email = "sharan.hosamane@gmail.com" }
-]
 requires-python = ">=3.12"
 dependencies = [
     "alembic>=1.20.0",

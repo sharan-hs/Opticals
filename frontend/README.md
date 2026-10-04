@@ -38,7 +38,7 @@ src/
 
 ## Deployment
 
-Hosted on Netlify. `../netlify.toml` sets the base directory to `frontend/`, the build command, publishes `build/`, rewrites all routes to `index.html` for client-side routing, and sets cache headers.
+Hosted on Vercel (`vercel.json`): builds into `build/`, forwards `/api/*` to the backend, sends other routes to `index.html` for client-side routing, and sets cache headers. In development, `npm run dev` forwards `/api` to the backend on port 8000. See `../docs/DEPLOYMENT.md`.
 
 ## Credits
 

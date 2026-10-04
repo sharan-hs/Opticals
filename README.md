@@ -23,7 +23,6 @@ First-time setup for each is in its README.
 
 ## Deployment
 
-- Frontend: Netlify, configured by `netlify.toml` (base directory `frontend/`).
-- Backend: not deployed yet (planned: Render/Railway + managed PostgreSQL).
+Vercel, on the shop's own accounts (vachanvijai@gmail.com): one project per folder (`frontend/`, `backend/`), Neon Postgres, and the site forwards `/api/*` to the backend so everything is same-origin. Setup steps: [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
 
 CI (GitHub Actions) runs lint, type checks and tests for whichever app a change touches.

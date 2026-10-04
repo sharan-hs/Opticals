@@ -1,0 +1,33 @@
+name: Migrate production database
+
+# Applies Alembic migrations when backend changes reach main. Vercel deploys
+# the new code at the same time, so migrations must be backwards compatible
+# (expand -> migrate data -> contract; see backend/README.md).
+on:
+  push:
+    branches: [main]
+    paths: ["backend/alembic/**", "backend/app/models/**"]
+  workflow_dispatch:
+
+concurrency:
+  group: migrate-production
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    # Repository secret MIGRATION_DATABASE_URL lives in this environment:
+    # GitHub -> Settings -> Environments -> production.
+    environment: production
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      APP_ENV: staging  # migrations only need a database URL
+      MIGRATION_DATABASE_URL: ${{ secrets.MIGRATION_DATABASE_URL }}
+      DATABASE_URL: ${{ secrets.MIGRATION_DATABASE_URL }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync --locked --no-dev
+      - run: uv run alembic upgrade head

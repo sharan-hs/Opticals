@@ -732,11 +732,11 @@ Cancellation of a CONFIRMED order: `on_hand += qty` with a `RETURN`-type (or `CA
 | Cloudinary / Razorpay | Same everywhere (external services) | Same | Same |
 | Main risk | Free tiers sleep (bad for webhooks) → use paid API tier | Single machine; ops burden on you | Cost/overkill |
 
-**Recommendation: Option A.**
-- Frontend: Netlify (already configured) or Vercel, custom domain `www.vijaiopticians.<tld>`.
-- API: Render (or Railway) paid starter instance (no sleeping — webhooks and payment callbacks must always be reachable), Docker or native Python build, `pre-deploy: alembic upgrade head`, health check `/health/ready`, domain `api.<domain>`.
-- Database: managed Postgres in the **same region** as the API (choose the region nearest India that both support, e.g. Singapore or Mumbai), daily backups + weekly `pg_dump` to separate storage via a scheduled GitHub Action.
-- Jobs: platform cron (e.g. Render Cron Job) running `python -m app.jobs expire-pending-orders` every 5 min.
+**Decision (2026-10-04): Option A on Vercel, all accounts owned by the shop (vachanvijai@gmail.com).** Details and setup steps: `docs/DEPLOYMENT.md`.
+- Frontend: Vercel project (root `frontend/`), custom domain `www.<domain>`. It forwards `/api/*` to the backend project, so the browser is same-origin with the API (first-party refresh cookie, no CORS).
+- API: second Vercel project (root `backend/`) running FastAPI as a Python function. Serverless consequences: no background process; recurring jobs via Vercel Cron hitting protected endpoints; expired reservations also released lazily during checkout; rate limits stored in Postgres; email sent within the request.
+- Database: Neon Postgres from the Vercel Marketplace, Singapore region; app uses the pooled URL, migrations use the direct URL from a GitHub Actions workflow on `main`. Daily backups + weekly `pg_dump` via a scheduled GitHub Action.
+- Plan: Vercel Pro (Hobby is non-commercial only).
 - Monitoring: Sentry (free tier) for React + FastAPI, UptimeRobot/Better Stack ping on `/health/ready`, platform logs.
 - Move to Option B later only if costs matter more than ops time.
 
@@ -837,8 +837,8 @@ CI: GitHub Actions — ruff + pytest (Postgres service container) + ESLint + Vit
 
 | | Development | Staging | Production |
 |---|---|---|---|
-| Frontend | `vite` dev server | Netlify branch deploy | Netlify prod |
-| API | `uvicorn --reload` | Render service (staging) | Render service (prod) |
+| Frontend | `vite` dev server (proxies `/api`) | Vercel preview deployment | Vercel production |
+| API | `uvicorn --reload` | Vercel preview deployment | Vercel production |
 | DB | local Postgres | separate managed DB (or Neon branch) | managed DB with backups |
 | Cloudinary | folder `dev/` | folder `staging/` | `Products/` (existing) |
 | Payments | FakeProvider | Razorpay **test** keys | Razorpay **live** keys |
