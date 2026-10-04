@@ -319,4 +319,9 @@ erDiagram
         bigint updated_by FK
         timestamptz updated_at
     }
+    rate_limit_buckets {
+        varchar key PK
+        timestamptz window_start
+        int count
+    }
 ```

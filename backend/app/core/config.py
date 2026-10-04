@@ -49,6 +49,15 @@ class Settings(BaseSettings):
     # Behind Vercel the client IP comes from X-Forwarded-For; locally from the socket.
     trust_proxy_headers: bool = False
 
+    # Product images. Uploads/verification need the API key and secret; without
+    # them admins can still attach images that already exist by public id.
+    cloudinary_cloud_name: str = "dyf8dp9oo"
+    cloudinary_api_key: str | None = None
+    cloudinary_api_secret: str | None = None
+    # Admin uploads go here; only images under this folder are ever deleted
+    # from Cloudinary (the original Products/ images are never touched).
+    cloudinary_upload_folder: str = "uploads"
+
     # "console" logs emails (development); "resend" sends them.
     email_provider: Literal["console", "resend"] = "console"
     email_from: str = "Vijai Opticians <no-reply@localhost>"
@@ -112,6 +121,10 @@ class Settings(BaseSettings):
         if self.cookie_secure is not None:
             return self.cookie_secure
         return self.app_env not in ("development", "test")
+
+    @property
+    def cloudinary_configured(self) -> bool:
+        return bool(self.cloudinary_api_key and self.cloudinary_api_secret)
 
     @property
     def trusted_origins(self) -> set[str]:
