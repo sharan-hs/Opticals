@@ -65,6 +65,9 @@ Production migrations run from GitHub Actions (`.github/workflows/migrate.yml`) 
 1. GitHub (owner's repo) → Settings → Environments → New environment `production`.
 2. Add secret `MIGRATION_DATABASE_URL` = Neon's **unpooled** URL (`DATABASE_URL_UNPOOLED` in Vercel).
 3. Run the workflow once, then `/health/ready` should report `"migrations": "ok"`.
+4. Load the starting catalogue once, from a developer machine:
+   `cd backend && APP_ENV=staging DATABASE_URL='<Neon unpooled URL>' uv run python -m app.cli seed`
+   (re-running is safe; it never overwrites stock counts or edited settings).
 
 Vercel deploys new code while the workflow migrates, so every migration must work with both the old and new code (expand → backfill → contract).
 

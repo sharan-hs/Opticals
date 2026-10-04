@@ -21,6 +21,7 @@ FastAPI + PostgreSQL. Synchronous SQLAlchemy 2 (psycopg 3), Alembic migrations, 
    cp .env.example .env      # put the password in both URLs; generate JWT_SECRET
    uv sync                   # creates .venv with all dependencies
    uv run alembic upgrade head
+   uv run python -m app.cli seed     # starting catalogue (safe to re-run)
    uv run python -m app.cli check
    ```
 
@@ -33,6 +34,8 @@ uv run pytest --cov                     # with coverage
 uv run ruff check . && uv run ruff format .
 uv run mypy app tests alembic/env.py
 uv run python -m app.cli --help         # admin commands
+uv run python -m app.cli seed --reset   # dev only: empty and reload the catalogue
+uv run python -m app.cli er-diagram     # regenerate docs/DATABASE.md after model changes
 ```
 
 ## Layout
@@ -43,13 +46,19 @@ app/
   cli.py           admin commands (Typer)
   core/            config, database session, errors, logging, middleware,
                    pagination, money (paise), migrations check, Sentry
-  models/          SQLAlchemy models; one Base.metadata for Alembic
+  models/          SQLAlchemy models by area (identity, catalog, inventory, cart,
+                   orders, payments, admin); one Base.metadata for Alembic
+  seed/            starting catalogue and default settings (idempotent)
   modules/<name>/  one folder per feature: router → service → repository
 alembic/           migrations
 tests/
 ```
 
 Conventions:
+- Schema diagram: `docs/DATABASE.md` (generated). The database enforces the rules it can
+  (CHECKs, unique and partial-unique indexes); `tests/test_schema.py` proves each one.
+- Status columns use `enum_column()` (varchar + CHECK named `ck_<table>_<column>`).
+- Relationships default to `lazy="raise"`: load what you need with `selectinload`/`joinedload`.
 - Money is integer **paise** everywhere; convert at the edges with `app.core.money`.
 - Services raise `AppError` subclasses (`NotFoundError`, `ConflictError`, …); the API turns them into
   `{"error": {"code", "message", "details"}, "request_id"}`.
