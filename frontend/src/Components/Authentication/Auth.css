@@ -1,0 +1,100 @@
+.authSection {
+  display: flex;
+  justify-content: center;
+  padding: 50px 15px 70px;
+}
+
+.authContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 40px;
+  width: 100%;
+  max-width: 500px;
+}
+
+.authTitle {
+  font-size: 26px;
+  font-weight: 600;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+.authTabs {
+  display: flex;
+  justify-content: center;
+  gap: 50px;
+}
+
+.authTabs a {
+  position: relative;
+  color: #767676;
+  text-decoration: none;
+  text-transform: uppercase;
+  font-size: 20px;
+  font-weight: 600;
+  transition: color 0.3s;
+}
+
+.authTabs a:hover,
+.authTabs a.active {
+  color: black;
+}
+
+.authTabs a::after {
+  content: "";
+  position: absolute;
+  bottom: -5px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: black;
+  transition: width 0.2s ease;
+}
+
+.authTabs a.active::after,
+.authTabs a:hover::after {
+  width: 100%;
+}
+
+.authForm {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+}
+
+.authIntro {
+  color: #555;
+  font-size: 17px;
+  line-height: 1.6;
+  text-align: center;
+}
+
+.authRow {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.authRow a,
+.authFooter a {
+  color: black;
+  font-size: 16px;
+}
+
+.authFooter {
+  text-align: center;
+  color: #767676;
+  font-size: 16px;
+}
+
+.authPrivacy {
+  color: #767676;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.authPrivacy a {
+  color: #c32929;
+  text-decoration: none;
+}

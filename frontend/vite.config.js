@@ -24,5 +24,7 @@ export default defineConfig({
     environment: "jsdom",
     globals: true,
     setupFiles: "./src/setupTests.js",
+    // Node's fetch needs absolute URLs; the mock API (MSW) listens here.
+    env: { VITE_API_BASE_URL: "http://localhost:3000/api/v1" },
   },
 });

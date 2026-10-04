@@ -343,3 +343,10 @@ def test_new_reset_request_invalidates_older_link(
     client.post(f"{API}/auth/forgot-password", json={"email": "ravi@example.com"})
     body = {"token": first, "new_password": "Brand-new-9x"}
     assert client.post(f"{API}/auth/reset-password", json=body).status_code == 400
+
+
+def test_password_errors_point_at_the_field(client: TestClient) -> None:
+    details = register(client, password="password123").json()["error"]["details"]
+    assert [(d["field"], d["message"]) for d in details] == [
+        ("password", "Value error, This password is too easy to guess")
+    ]

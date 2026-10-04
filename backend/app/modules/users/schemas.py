@@ -1,6 +1,13 @@
-from typing import Annotated, Self
+from typing import Annotated
 
-from pydantic import AfterValidator, BaseModel, ConfigDict, Field, model_validator
+from pydantic import (
+    AfterValidator,
+    BaseModel,
+    ConfigDict,
+    Field,
+    ValidationInfo,
+    field_validator,
+)
 
 from app.core.validators import (
     check_password_policy,
@@ -23,23 +30,22 @@ class ProfileUpdate(BaseModel):
     # Empty string clears the phone number.
     phone: str | None = None
 
-    @model_validator(mode="after")
-    def _normalise_phone(self) -> Self:
-        if self.phone:
-            self.phone = normalise_phone(self.phone)
-        return self
+    @field_validator("phone")
+    @classmethod
+    def _normalise_phone(cls, value: str | None) -> str | None:
+        return normalise_phone(value) if value else value
 
 
 class ChangePasswordRequest(BaseModel):
     current_password: PasswordInput
     new_password: PasswordInput
 
-    @model_validator(mode="after")
-    def _password_policy(self) -> Self:
-        check_password_policy(self.new_password)
-        if self.new_password == self.current_password:
+    @field_validator("new_password")
+    @classmethod
+    def _password_policy(cls, value: str, info: ValidationInfo) -> str:
+        if value == info.data.get("current_password"):
             raise ValueError("Choose a password different from the current one")
-        return self
+        return check_password_policy(value)
 
 
 class AddressBase(BaseModel):

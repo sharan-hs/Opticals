@@ -11,6 +11,8 @@ import { MdOutlineClose } from "react-icons/md";
 
 import logo2 from "../../Assets/logo2.png";
 import { selectCartCount } from "../../Features/Cart/cartSlice";
+import { selectAuthStatus, selectCurrentUser } from "../../Features/Auth/authSlice";
+import { useSignOut } from "../../Features/Auth/useSignOut";
 
 const NAV_LINKS = [
   { to: "/", label: "Home" },
@@ -62,8 +64,71 @@ const CartLink = ({ count, iconColor }) => (
   </Link>
 );
 
+// Signed out: a link to log in. Signed in: a small panel with account links.
+const AccountMenu = () => {
+  const user = useSelector(selectCurrentUser);
+  const status = useSelector(selectAuthStatus);
+  const location = useLocation();
+  const [open, setOpen] = useState(false);
+  const [signOut] = useSignOut();
+  const ref = useRef(null);
+
+  useEffect(() => setOpen(false), [location.pathname]);
+
+  useEffect(() => {
+    if (!open) return undefined;
+    const onPointer = (event) => {
+      if (!ref.current?.contains(event.target)) setOpen(false);
+    };
+    const onKey = (event) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("pointerdown", onPointer);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("pointerdown", onPointer);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
+  if (status !== "authenticated") {
+    return (
+      <Link to="/login" aria-label="Log in or create an account">
+        <FaRegUser size={22} />
+      </Link>
+    );
+  }
+
+  return (
+    <div className="accountMenu" ref={ref}>
+      <button
+        type="button"
+        className="iconButton"
+        aria-expanded={open}
+        aria-controls="account-menu"
+        aria-label="Account menu"
+        onClick={() => setOpen((value) => !value)}
+      >
+        <FaRegUser size={22} />
+      </button>
+      {open && (
+        <div id="account-menu" className="accountMenuPanel">
+          <p>Hi, {user.full_name.split(" ")[0]}</p>
+          <Link to="/account">My account</Link>
+          <Link to="/account/addresses">Addresses</Link>
+          <button type="button" onClick={signOut}>
+            Log out
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const Navbar = () => {
   const cartCount = useSelector(selectCartCount);
+  const isAuthenticated = useSelector(selectAuthStatus) === "authenticated";
+  const [signOut] = useSignOut();
   const location = useLocation();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -132,9 +197,7 @@ const Navbar = () => {
           >
             {searchOpen ? <MdOutlineClose size={22} /> : <FiSearch size={22} />}
           </button>
-          <Link to="/loginSignUp" aria-label="My account">
-            <FaRegUser size={22} />
-          </Link>
+          <AccountMenu />
           <CartLink count={cartCount} />
         </div>
       </nav>
@@ -192,10 +255,15 @@ const Navbar = () => {
 
           <div className="mobile-menuFooter">
             <div className="mobile-menuFooterLogin">
-              <Link to="/loginSignUp">
+              <Link to={isAuthenticated ? "/account" : "/login"}>
                 <FaRegUser aria-hidden="true" />
-                <p>My Account</p>
+                <p>{isAuthenticated ? "My Account" : "Log in / Register"}</p>
               </Link>
+              {isAuthenticated && (
+                <button type="button" className="mobileSignOut" onClick={signOut}>
+                  Log out
+                </button>
+              )}
             </div>
           </div>
         </nav>

@@ -31,7 +31,7 @@ const FOOTER_COLUMNS = [
   {
     heading: "Help",
     links: [
-      { to: "/loginSignUp", label: "My Account" },
+      { to: "/account", label: "My Account" },
       { to: "/contact", label: "Store Locations" },
       { to: "/terms", label: "Terms & Conditions" },
       { to: "/privacy-policy", label: "Privacy Policy" },

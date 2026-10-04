@@ -27,10 +27,11 @@ module.exports = {
       },
     },
     {
-      files: ["**/*.test.{js,jsx}", "src/setupTests.js"],
+      files: ["**/*.test.{js,jsx}", "src/setupTests.js", "src/test/**"],
       env: { node: true },
       globals: {
         describe: "readonly",
+        it: "readonly",
         test: "readonly",
         expect: "readonly",
         beforeEach: "readonly",

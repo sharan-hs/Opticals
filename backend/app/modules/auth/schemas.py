@@ -1,6 +1,14 @@
-from typing import Annotated, Literal, Self
+from typing import Annotated, Literal
 
-from pydantic import AfterValidator, BaseModel, ConfigDict, EmailStr, Field, model_validator
+from pydantic import (
+    AfterValidator,
+    BaseModel,
+    ConfigDict,
+    EmailStr,
+    Field,
+    ValidationInfo,
+    field_validator,
+)
 
 from app.core.validators import MAX_PASSWORD_LENGTH, check_password_policy, normalise_phone
 from app.models.enums import UserRole
@@ -35,10 +43,11 @@ class RegisterRequest(BaseModel):
     full_name: FullName
     phone: Phone | None = None
 
-    @model_validator(mode="after")
-    def _password_policy(self) -> Self:
-        check_password_policy(self.password, email=self.email)
-        return self
+    # Field validators (not model validators) so errors point at "password".
+    @field_validator("password")
+    @classmethod
+    def _password_policy(cls, value: str, info: ValidationInfo) -> str:
+        return check_password_policy(value, email=info.data.get("email"))
 
 
 class LoginRequest(BaseModel):
@@ -63,7 +72,7 @@ class ResetPasswordRequest(BaseModel):
     token: str = Field(min_length=20, max_length=200)
     new_password: PasswordInput
 
-    @model_validator(mode="after")
-    def _password_policy(self) -> Self:
-        check_password_policy(self.new_password)
-        return self
+    @field_validator("new_password")
+    @classmethod
+    def _password_policy(cls, value: str) -> str:
+        return check_password_policy(value)

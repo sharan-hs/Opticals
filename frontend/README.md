@@ -11,6 +11,7 @@ Requirements: Node.js 18.18+ (Node 22 LTS recommended) and npm.
 ```bash
 npm install
 npm run dev      # dev server on http://localhost:3000 (npm start also works)
+                 # login/accounts need the API running too: see ../backend/README.md
 npm run build    # production build in build/
 npm run preview  # serve the production build locally
 npm test         # unit tests (Vitest)
