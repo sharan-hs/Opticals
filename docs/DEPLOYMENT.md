@@ -39,6 +39,8 @@ Why `/api` goes through the website's own domain: the login refresh cookie must 
 3. The owner adds the developer as a collaborator: Settings → Collaborators.
 4. Developer, locally: `git remote set-url origin https://github.com/<owner>/Opticals.git`.
 
+The root `vercel.json` turns off Git deployments for any Vercel project rooted at the repository root. It's there for the old `opticals` project on the developer's personal Vercel team (from the pre-monorepo site), which would otherwise try, and fail, to build every push. The owner's projects use `frontend/` and `backend/` as their Root Directory, read their own `vercel.json`, and are unaffected. Once that old project is disconnected or deleted, the root file can go.
+
 ### 2. Vercel projects
 1. Sign up at vercel.com with **Continue with GitHub** (the owner's GitHub), and allow access to the `Opticals` repo.
 2. **Backend first.** Add New → Project → `Opticals`:
