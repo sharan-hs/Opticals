@@ -10,9 +10,9 @@ Companion to [ARCHITECTURE_PLAN.md](ARCHITECTURE_PLAN.md). Section references li
 
 ## Progress
 
-Last updated: 2026-10-04 19:51
+Last updated: 2026-10-04 20:22
 
-_Status: Phase 4 (accounts) done on phase2/backend-foundation (6c13491): backend 115 tests, frontend 40 tests, browser e2e 15/15. Paused for user testing (docs/PHASE4_TESTING.md)._
+_Status: Phases 5–6 done on phase2/backend-foundation (c7a76b1): catalogue + admin + stock. Backend 175 tests, frontend 29, browser runs storefront 14/14 and admin 16/16. Paused for user testing (docs/PHASE5_6_TESTING.md)._
 
 | Phase | Done | In progress | Total | % done |
 |---|---:|---:|---:|---:|
@@ -21,8 +21,8 @@ _Status: Phase 4 (accounts) done on phase2/backend-foundation (6c13491): backend
 | Phase 2 | 26 | 4 | 31 | 84% |
 | Phase 3 | 28 | 2 | 30 | 93% |
 | Phase 4 | 32 | 0 | 32 | 100% |
-| Phase 5 | 0 | 0 | 39 | 0% |
-| Phase 6 | 0 | 0 | 14 | 0% |
+| Phase 5 | 35 | 4 | 39 | 90% |
+| Phase 6 | 14 | 0 | 14 | 100% |
 | Phase 7 | 0 | 0 | 13 | 0% |
 | Phase 8 | 0 | 0 | 21 | 0% |
 | Phase 9 | 0 | 0 | 15 | 0% |
@@ -31,23 +31,23 @@ _Status: Phase 4 (accounts) done on phase2/backend-foundation (6c13491): backend
 | Phase 12 | 0 | 2 | 21 | 0% |
 | P1 | 0 | 0 | 12 | 0% |
 | P2 | 0 | 0 | 7 | 0% |
-| **All** | **209** | **15** | **417** | **50%** |
+| **All** | **258** | **19** | **417** | **62%** |
 
 **Recently completed**
+- Cart lines are now SKUs (snapshot until Phase 7 server pricing)
+- 6.1–6.14 Inventory: locked ledger, admin stock grid, adjust dialog, history, transactions log
+- 5.4.x Admin catalogue UI: products, editor tabs, categories, brands
+- 5.3.x Storefront on the API: shop, product page, related, home, CloudImage, JSON-LD
+- 5.2.x Admin catalogue API + Cloudinary signed uploads (keys pending)
+- 5.1.x Public catalogue API: filters, search, facets, availability, caching
 - Phase 4 accounts: API + UI; end-to-end browser run register→reload→profile→address→change password→logout→login passes
 - 4.2.1–4.2.14 Frontend auth: RTK Query reauth, guards, login/register/reset, account pages, MSW tests
 - 4.1.1–4.1.18 Backend auth: Argon2, JWT, refresh rotation, addresses, email, rate limits, create-admin
-- 3.3.x Seed: categories, brands, 7 models / 11 variants, 64 images, inventory at 0, store settings
-- 3.3.8 ER diagram (docs/DATABASE.md)
-- 3.2.1–3.2.4 7 migrations, round-trip CI, models-match-migrations test, 23 constraint tests
-- 3.1.1–3.1.18 21 tables with mixins, CHECKs, indexes, lazy="raise"
-- Deployment switched to Vercel on owner's accounts (docs/DEPLOYMENT.md; 12.4/12.5 config written)
-- 2.5.1/2.5.2 pytest fixtures + backend tests (now 70)
 
 **Up next**
-- 👤 User testing of Phase 4 (docs/PHASE4_TESTING.md)
-- Phase 5.1 Public catalogue API
-- Phase 5.2 Admin catalogue API
+- 👤 User testing of Phases 5–6 (docs/PHASE5_6_TESTING.md)
+- Phase 7 Server cart
+- 👤 Cloudinary API key/secret (unblocks 5.2.8, 5.2.9, 5.4.11, 3.3.4)
 - 👤 Open PRs; 2.5.5 enable branch protection
 - 👤 12.2 Owner accounts (GitHub transfer, Vercel Pro, Neon)
 
@@ -81,6 +81,8 @@ Work top to bottom inside a phase unless a dependency says otherwise.
 ---
 
 ## Phase 1 — Frontend cleanup (existing React app, static data)
+
+> ✅ Phases 5–6 done on phase2/backend-foundation (c7a76b1): catalogue + admin + stock. Backend 175 tests, frontend 29, browser runs storefront 14/14 and admin 16/16. Paused for user testing (docs/PHASE5_6_TESTING.md).
 
 > ✅ Phase 4 (accounts) done on phase2/backend-foundation (6c13491): backend 115 tests, frontend 40 tests, browser e2e 15/15. Paused for user testing (docs/PHASE4_TESTING.md).
 
@@ -404,71 +406,71 @@ Work top to bottom inside a phase unless a dependency says otherwise.
 ## Phase 5 — Catalogue APIs & admin catalogue
 
 ### 5.1 Backend public
-- [ ] 5.1.1 Schemas: `ProductCard`, `ProductDetail`, `VariantRead`, `CategoryTree`, `BrandRead`
-- [ ] 5.1.2 Listing query: filters (category incl. subcategories, brand, gender, shape, type, material, colour family, price range on cheapest variant, in stock), sort, pagination
-- [ ] 5.1.3 Search: full-text + trigram fallback, relevance sort
-- [ ] 5.1.4 Facets query with counts
-- [ ] 5.1.5 `GET /products`, `/products/facets`, `/products/{slug}`, `/products/{slug}/related`
-- [ ] 5.1.6 `GET /categories`, `GET /brands`
-- [ ] 5.1.7 Availability buckets (in stock / low / out) — no exact counts exposed
-- [ ] 5.1.8 Cache-Control headers on public catalogue
-- [ ] 5.1.9 Tests: each filter, combined filters, sorts, pagination bounds, inactive/deleted hidden, search
+- [x] 5.1.1 Schemas: `ProductCard`, `ProductDetail`, `VariantRead`, `CategoryTree`, `BrandRead`
+- [x] 5.1.2 Listing query: filters (category incl. subcategories, brand, gender, shape, type, material, colour family, price range on cheapest variant, in stock), sort, pagination
+- [x] 5.1.3 Search: full-text + trigram fallback, relevance sort
+- [x] 5.1.4 Facets query with counts
+- [x] 5.1.5 `GET /products`, `/products/facets`, `/products/{slug}`, `/products/{slug}/related`
+- [x] 5.1.6 `GET /categories`, `GET /brands`
+- [x] 5.1.7 Availability buckets (in stock / low / out) — no exact counts exposed
+- [x] 5.1.8 Cache-Control headers on public catalogue _(browsers revalidate (max-age=0); CDN-Cache-Control 60 s for Vercel's edge)_
+- [x] 5.1.9 Tests: each filter, combined filters, sorts, pagination bounds, inactive/deleted hidden, search
 
 ### 5.2 Backend admin
-- [ ] 5.2.1 Audit-log helper (records field-level changes)
-- [ ] 5.2.2 Slug generation + uniqueness
-- [ ] 5.2.3 Admin products: list (incl. inactive), create with variants, get, update, status change, soft delete
-- [ ] 5.2.4 Variants: create, update, soft delete; SKU conflict → 409; price ≤ MRP
-- [ ] 5.2.5 Inventory row auto-created with each variant
-- [ ] 5.2.6 Categories: CRUD, depth ≤ 2, cycle check, deactivate cascades visibility
-- [ ] 5.2.7 Brands: CRUD
-- [ ] 5.2.8 Cloudinary signed-upload endpoint (folder, formats jpg/png/webp, max size)
-- [ ] 5.2.9 Register uploaded image (verify via Admin API), update alt/primary/variant, reorder, delete (+ Cloudinary destroy)
-- [ ] 5.2.10 Tests incl. 403 for customers on every admin route
+- [x] 5.2.1 Audit-log helper (records field-level changes)
+- [x] 5.2.2 Slug generation + uniqueness
+- [x] 5.2.3 Admin products: list (incl. inactive), create with variants, get, update, status change, soft delete
+- [x] 5.2.4 Variants: create, update, soft delete; SKU conflict → 409; price ≤ MRP
+- [x] 5.2.5 Inventory row auto-created with each variant
+- [x] 5.2.6 Categories: CRUD, depth ≤ 2, cycle check, deactivate cascades visibility
+- [x] 5.2.7 Brands: CRUD
+- [~] 5.2.8 Cloudinary signed-upload endpoint (folder, formats jpg/png/webp, max size) _(signature endpoint done; needs owner's Cloudinary API key/secret to use)_
+- [~] 5.2.9 Register uploaded image (verify via Admin API), update alt/primary/variant, reorder, delete (+ Cloudinary destroy) _(register/primary/reorder/delete done; server-side asset check active once keys are set; deletes only uploads/ assets)_
+- [x] 5.2.10 Tests incl. 403 for customers on every admin route _(route sweep: every admin route 401 anonymous / 403 customer)_
 
 ### 5.3 Storefront on API
-- [ ] 5.3.1 `catalogApi` endpoints (RTK Query)
-- [ ] 5.3.2 Shop page: URL params → query; facets drive filter panel; server pagination; skeletons; error + retry
-- [ ] 5.3.3 Product page: variant selector (colour/size), `?variant=SKU`, availability badge, variant images
-- [ ] 5.3.4 Related products from API
-- [ ] 5.3.5 Home featured products from API
-- [ ] 5.3.6 Category navigation (header/shop) from API
-- [ ] 5.3.7 `<Img>` component with Cloudinary `srcSet`
-- [ ] 5.3.8 Remove static catalog usage from the storefront (keep file only as seed input)
-- [ ] 5.3.9 Product JSON-LD + meta tags (react-helmet-async)
+- [x] 5.3.1 `catalogApi` endpoints (RTK Query)
+- [x] 5.3.2 Shop page: URL params → query; facets drive filter panel; server pagination; skeletons; error + retry
+- [x] 5.3.3 Product page: variant selector (colour/size), `?variant=SKU`, availability badge, variant images
+- [x] 5.3.4 Related products from API
+- [x] 5.3.5 Home featured products from API
+- [~] 5.3.6 Category navigation (header/shop) from API _(shop category filter from API; header nav unchanged)_
+- [x] 5.3.7 `<Img>` component with Cloudinary `srcSet` _(CloudImage)_
+- [x] 5.3.8 Remove static catalog usage from the storefront (keep file only as seed input) _(catalog.js removed; legacy colour URLs redirect via Data/legacyProductUrls.js)_
+- [x] 5.3.9 Product JSON-LD + meta tags (react-helmet-async)
 
 ### 5.4 Admin UI — catalogue
-- [ ] 5.4.1 Admin layout (lazy bundle): sidebar nav, top bar, `RequireRole`
-- [ ] 5.4.2 Install MUI X Data Grid; `AdminTable` wrapper (server pagination/sort/filter in URL, loading/empty/error)
-- [ ] 5.4.3 `ConfirmDialog`, form field components
-- [ ] 5.4.4 Products list (search, category, brand, status, stock filters)
-- [ ] 5.4.5 Product editor — Details tab
-- [ ] 5.4.6 Product editor — Variants tab (inline grid: SKU, colour, size, MRP, price, active)
-- [ ] 5.4.7 Product editor — Images tab (signed upload, drag-drop, progress, reorder, primary, alt, per-variant)
-- [ ] 5.4.8 Product editor — Specifications tab (key/value rows)
-- [ ] 5.4.9 Activate/deactivate/delete with confirmation
-- [ ] 5.4.10 Categories page (tree, add/edit, subcategories, deactivate)
-- [ ] 5.4.11 Brands page (logo upload)
+- [x] 5.4.1 Admin layout (lazy bundle): sidebar nav, top bar, `RequireRole`
+- [x] 5.4.2 Install MUI X Data Grid; `AdminTable` wrapper (server pagination/sort/filter in URL, loading/empty/error) _(plain accessible tables with server pagination instead of MUI X Data Grid (lighter; catalogue is small))_
+- [x] 5.4.3 `ConfirmDialog`, form field components
+- [x] 5.4.4 Products list (search, category, brand, status, stock filters)
+- [x] 5.4.5 Product editor — Details tab
+- [x] 5.4.6 Product editor — Variants tab (inline grid: SKU, colour, size, MRP, price, active)
+- [x] 5.4.7 Product editor — Images tab (signed upload, drag-drop, progress, reorder, primary, alt, per-variant)
+- [x] 5.4.8 Product editor — Specifications tab (key/value rows)
+- [x] 5.4.9 Activate/deactivate/delete with confirmation
+- [x] 5.4.10 Categories page (tree, add/edit, subcategories, deactivate)
+- [~] 5.4.11 Brands page (logo upload) _(brands page done; logo upload pending Cloudinary keys)_
 - **Done when:** admin creates a product with 2 variants and images; it appears in the shop with working filters.
 
 ---
 
 ## Phase 6 — Inventory
 
-- [ ] 6.1 Inventory service `adjust(variant, type, delta, note, actor)` with `SELECT … FOR UPDATE` + ledger row + audit log
-- [ ] 6.2 `reserve`, `release`, `commit_sale`, `restock_on_cancel` functions (used in Phase 8)
-- [ ] 6.3 Validation: result ≥ reserved, note required for negative adjustments
-- [ ] 6.4 `GET /admin/inventory` (search, filters, sort, pagination)
-- [ ] 6.5 `GET /admin/inventory/low-stock`
-- [ ] 6.6 `POST /admin/inventory/{variant_id}/adjustments`
-- [ ] 6.7 `PATCH /admin/inventory/{variant_id}` (threshold)
-- [ ] 6.8 `GET /admin/inventory/transactions`
-- [ ] 6.9 "Mark out of stock" = adjustment to zero available with note
-- [ ] 6.10 Tests: ledger correctness (20 → 18 → 28 example), negative guard, concurrency (parallel adjustments)
-- [ ] 6.11 Admin UI: inventory grid (available / reserved / on hand, stock badges)
-- [ ] 6.12 Admin UI: restock / adjust dialog
-- [ ] 6.13 Admin UI: per-variant history drawer
-- [ ] 6.14 Admin UI: transactions log page with filters
+- [x] 6.1 Inventory service `adjust(variant, type, delta, note, actor)` with `SELECT … FOR UPDATE` + ledger row + audit log
+- [x] 6.2 `reserve`, `release`, `commit_sale`, `restock_on_cancel` functions (used in Phase 8)
+- [x] 6.3 Validation: result ≥ reserved, note required for negative adjustments
+- [x] 6.4 `GET /admin/inventory` (search, filters, sort, pagination)
+- [x] 6.5 `GET /admin/inventory/low-stock`
+- [x] 6.6 `POST /admin/inventory/{variant_id}/adjustments`
+- [x] 6.7 `PATCH /admin/inventory/{variant_id}` (threshold)
+- [x] 6.8 `GET /admin/inventory/transactions`
+- [x] 6.9 "Mark out of stock" = adjustment to zero available with note
+- [x] 6.10 Tests: ledger correctness (20 → 18 → 28 example), negative guard, concurrency (parallel adjustments) _(includes real parallel transactions: 10 concurrent restocks, 5 buyers for the last item)_
+- [x] 6.11 Admin UI: inventory grid (available / reserved / on hand, stock badges)
+- [x] 6.12 Admin UI: restock / adjust dialog _(dialog also sets alert level and marks out of stock)_
+- [x] 6.13 Admin UI: per-variant history drawer
+- [x] 6.14 Admin UI: transactions log page with filters
 - **Done when:** every stock change has a ledger row; stock can never go negative.
 
 ---
