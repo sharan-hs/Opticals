@@ -4,6 +4,7 @@ import os
 os.environ["APP_ENV"] = "test"
 
 from collections.abc import Iterator
+from contextlib import contextmanager
 
 import pytest
 from alembic import command
@@ -17,7 +18,9 @@ from sqlalchemy.orm import Session
 from app.core.config import BACKEND_DIR, get_settings
 from app.core.database import engine as app_engine
 from app.core.database import get_db
+from app.core.rate_limit import RateLimiter, get_rate_limiter
 from app.main import create_app
+from app.modules.notifications.email import EmailMessage, get_email_sender
 
 
 @pytest.fixture(scope="session")
@@ -50,10 +53,31 @@ def db(engine: Engine) -> Iterator[Session]:
         connection.close()
 
 
+class Outbox:
+    """Collects emails instead of sending them."""
+
+    def __init__(self) -> None:
+        self.messages: list[EmailMessage] = []
+
+    def send(self, message: EmailMessage) -> None:
+        self.messages.append(message)
+
+
 @pytest.fixture
-def app(db: Session) -> Iterator[FastAPI]:
+def outbox() -> Outbox:
+    return Outbox()
+
+
+@pytest.fixture
+def app(db: Session, outbox: Outbox) -> Iterator[FastAPI]:
+    @contextmanager
+    def test_session() -> Iterator[Session]:
+        yield db  # rate-limit counts roll back with the test
+
     application = create_app()
     application.dependency_overrides[get_db] = lambda: db
+    application.dependency_overrides[get_rate_limiter] = lambda: RateLimiter(test_session)
+    application.dependency_overrides[get_email_sender] = lambda: outbox
     yield application
 
 

@@ -70,7 +70,20 @@ Conventions:
 |---|---|
 | `GET /health` | Process is up (no DB) |
 | `GET /health/ready` | DB reachable and migrations at head; 503 otherwise |
-| `/api/v1/...` | Feature routes (from Phase 3) |
+| `POST /api/v1/auth/register`, `/login` | Create account / sign in → access token + refresh cookie |
+| `POST /api/v1/auth/refresh`, `/logout` | Cookie-based; need header `X-Requested-With: fetch` |
+| `POST /api/v1/auth/logout-all`, `/change-password` | Signed in |
+| `POST /api/v1/auth/forgot-password`, `/reset-password` | Emailed single-use link (30 min) |
+| `GET/PATCH /api/v1/me` | Profile |
+| `/api/v1/me/addresses` | List, add, edit, delete, `/{id}/default` |
+
+Auth model: a 15-minute JWT access token sent as `Authorization: Bearer …` (kept in memory
+by the frontend) and a 30-day refresh token in an httpOnly cookie scoped to `/api/v1/auth`,
+rotated on every refresh; reusing an old refresh token signs that session out everywhere.
+Rate limits (login, register, forgot/reset password) are counted in Postgres. In development
+emails are printed to the server log, including password-reset links.
+
+Create the first admin: `uv run python -m app.cli create-admin` (prompts for the password).
 
 ## Migrations
 

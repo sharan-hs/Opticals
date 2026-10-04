@@ -40,6 +40,19 @@ class Settings(BaseSettings):
     frontend_url: str = "http://localhost:3000"
 
     jwt_secret: str = DEV_JWT_SECRET
+    access_token_ttl_minutes: int = 15
+    refresh_token_ttl_days: int = 30
+    password_reset_ttl_minutes: int = 30
+    # Secure cookies need HTTPS; local development runs on plain http.
+    cookie_secure: bool | None = None
+
+    # Behind Vercel the client IP comes from X-Forwarded-For; locally from the socket.
+    trust_proxy_headers: bool = False
+
+    # "console" logs emails (development); "resend" sends them.
+    email_provider: Literal["console", "resend"] = "console"
+    email_from: str = "Vijai Opticians <no-reply@localhost>"
+    resend_api_key: str | None = None
 
     log_level: str = "INFO"
     sentry_dsn: str | None = None
@@ -78,6 +91,10 @@ class Settings(BaseSettings):
             local = [o for o in self.cors_origins if "localhost" in o or "127.0.0.1" in o]
             if local:
                 raise ValueError(f"CORS_ORIGINS must not include local origins: {local}")
+            if self.cookie_secure is False:
+                raise ValueError("COOKIE_SECURE can't be false in production")
+        if self.email_provider == "resend" and not self.resend_api_key:
+            raise ValueError("RESEND_API_KEY is required when EMAIL_PROVIDER=resend")
         return self
 
     @property
@@ -89,6 +106,17 @@ class Settings(BaseSettings):
     @property
     def is_production(self) -> bool:
         return self.app_env == "production"
+
+    @property
+    def secure_cookies(self) -> bool:
+        if self.cookie_secure is not None:
+            return self.cookie_secure
+        return self.app_env not in ("development", "test")
+
+    @property
+    def trusted_origins(self) -> set[str]:
+        """Origins allowed to use cookie-authenticated endpoints."""
+        return {*self.cors_origins, self.frontend_url.rstrip("/")}
 
 
 @lru_cache

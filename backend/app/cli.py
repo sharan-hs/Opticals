@@ -11,7 +11,11 @@ from app.core.config import get_settings
 from app.core.database import SessionLocal, engine
 from app.core.erd import render_er_markdown
 from app.core.migrations import current_heads, expected_heads
-from app.models import Base
+from app.core.security import hash_password
+from app.core.validators import check_password_policy
+from app.models import Base, User
+from app.models.enums import UserRole
+from app.modules.auth.repository import get_user_by_email
 from app.seed.catalog import reset_catalogue, seed_catalogue
 
 cli = typer.Typer(no_args_is_help=True, help="Vijai Opticians API admin commands.")
@@ -69,6 +73,47 @@ def _print_counts(db: Session) -> None:
     for table in ("categories", "brands", "products", "product_variants", "product_images"):
         count = db.execute(text(f"SELECT count(*) FROM {table}")).scalar_one()  # noqa: S608
         typer.echo(f"  {table:<17} {count}")
+
+
+@cli.command("create-admin")
+def create_admin(
+    email: str = typer.Option(..., prompt=True),
+    full_name: str = typer.Option("Store Admin", prompt="Full name"),
+) -> None:
+    """Create an admin account, or make an existing account an admin.
+
+    The password is asked for interactively and never appears in shell history.
+    """
+    email = email.strip().lower()
+    with SessionLocal() as db:
+        user = get_user_by_email(db, email)
+        if user is not None:
+            if user.role == UserRole.ADMIN:
+                typer.echo(f"{email} is already an admin.")
+                return
+            typer.confirm(f"{email} exists. Make this account an admin?", abort=True)
+            user.role = UserRole.ADMIN
+            user.is_active = True
+            db.commit()
+            typer.secho(f"{email} is now an admin.", fg="green")
+            return
+
+        password = typer.prompt("Password", hide_input=True, confirmation_prompt=True)
+        try:
+            check_password_policy(password, email=email)
+        except ValueError as exc:
+            typer.secho(str(exc), fg="red")
+            raise typer.Exit(code=1) from exc
+        db.add(
+            User(
+                email=email,
+                full_name=full_name.strip(),
+                password_hash=hash_password(password),
+                role=UserRole.ADMIN,
+            )
+        )
+        db.commit()
+    typer.secho(f"Admin {email} created.", fg="green")
 
 
 @cli.command("er-diagram")

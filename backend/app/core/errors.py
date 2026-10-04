@@ -27,11 +27,17 @@ class AppError(Exception):
     message = "The request could not be processed."
 
     def __init__(
-        self, message: str | None = None, *, code: str | None = None, details: Any = None
+        self,
+        message: str | None = None,
+        *,
+        code: str | None = None,
+        details: Any = None,
+        headers: Mapping[str, str] | None = None,
     ) -> None:
         self.message = message or self.message
         self.code = code or self.code
         self.details = details
+        self.headers = headers
         super().__init__(self.message)
 
 
@@ -44,6 +50,9 @@ class UnauthorizedError(AppError):
     status_code = 401
     code = "UNAUTHORIZED"
     message = "Authentication required."
+
+    def __init__(self, message: str | None = None, *, code: str | None = None) -> None:
+        super().__init__(message, code=code, headers={"WWW-Authenticate": "Bearer"})
 
 
 class ForbiddenError(AppError):
@@ -62,6 +71,18 @@ class ConflictError(AppError):
     status_code = 409
     code = "CONFLICT"
     message = "This conflicts with existing data."
+
+
+class RateLimitedError(AppError):
+    status_code = 429
+    code = "RATE_LIMITED"
+    message = "Too many attempts. Please wait and try again."
+
+    def __init__(self, retry_after_seconds: int) -> None:
+        super().__init__(
+            details={"retry_after_seconds": retry_after_seconds},
+            headers={"Retry-After": str(retry_after_seconds)},
+        )
 
 
 _HTTP_CODES = {
@@ -97,7 +118,7 @@ def error_response(
 
 async def _app_error(_: Request, exc: Exception) -> JSONResponse:
     assert isinstance(exc, AppError)  # noqa: S101
-    return error_response(exc.status_code, exc.code, exc.message, exc.details)
+    return error_response(exc.status_code, exc.code, exc.message, exc.details, exc.headers)
 
 
 async def _http_error(_: Request, exc: Exception) -> JSONResponse:

@@ -6,6 +6,7 @@ from typing import Any
 
 from sqlalchemy.orm import Session
 
+from app.core.security import create_access_token, hash_password
 from app.models import (
     Address,
     Brand,
@@ -25,8 +26,11 @@ def _n() -> int:
     return next(_seq)
 
 
-def make_user(db: Session, **overrides: Any) -> User:
+def make_user(db: Session, *, password: str | None = None, **overrides: Any) -> User:
+    """`password` is hashed for real (slow-ish); without it the hash is a placeholder."""
     n = _n()
+    if password is not None:
+        overrides["password_hash"] = hash_password(password)
     values: dict[str, Any] = {
         "email": f"user{n}@example.com",
         "password_hash": "not-a-real-hash",
@@ -125,3 +129,7 @@ def make_order(db: Session, user: User, **overrides: Any) -> Order:
     db.add(order)
     db.flush()
     return order
+
+
+def auth_headers(user: User) -> dict[str, str]:
+    return {"Authorization": f"Bearer {create_access_token(user.id, user.role).token}"}

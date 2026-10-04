@@ -24,7 +24,7 @@ GROUPS = {
         "payment_events",
         "refunds",
     ],
-    "Admin": ["audit_logs", "store_settings"],
+    "Admin": ["audit_logs", "store_settings", "rate_limit_buckets"],
 }
 
 

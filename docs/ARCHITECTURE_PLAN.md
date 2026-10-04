@@ -509,7 +509,7 @@ Auth column: Public / Customer (any logged-in user) / Admin (`role=ADMIN`; futur
 |---|---|---|---|
 | GET `/me` | Customer | → `{id, email, full_name, phone, role}` | 401 |
 | PATCH `/me` | Customer | `{full_name?, phone?}` → user | 422 |
-| POST `/me/change-password` | Customer | `{current_password, new_password}` → 204 | 400 wrong current password; revokes other sessions |
+| POST `/auth/change-password` | Customer | `{current_password, new_password}` → 204 | 400 wrong current password; revokes other sessions (under `/auth` so the refresh cookie identifies the current session) |
 | GET `/me/addresses` | Customer | → `[address]` | |
 | POST `/me/addresses` | Customer | address → 201 address | pincode/phone/state validation; max 10 addresses |
 | PATCH `/me/addresses/{id}` | Customer (owner) | partial → address | 404 if not owner (don't leak existence) |

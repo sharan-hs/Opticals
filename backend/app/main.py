@@ -12,13 +12,16 @@ from app.core.errors import register_exception_handlers
 from app.core.logging import configure_logging
 from app.core.middleware import RequestContextMiddleware, SecurityHeadersMiddleware
 from app.core.sentry import init_sentry
+from app.modules.auth.router import router as auth_router
 from app.modules.health.router import router as health_router
+from app.modules.users.router import router as users_router
 
 logger = logging.getLogger(__name__)
 
-# Feature routers (auth, catalog, cart, orders, ...) are included here as
-# they're built.
+# Feature routers; catalogue, cart and orders are added as they're built.
 api_router = APIRouter()
+api_router.include_router(auth_router)
+api_router.include_router(users_router)
 
 
 @asynccontextmanager

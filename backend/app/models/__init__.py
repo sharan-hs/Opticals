@@ -11,6 +11,7 @@ from app.models.identity import Address, PasswordResetToken, RefreshToken, User
 from app.models.inventory import Inventory, InventoryTransaction
 from app.models.orders import Order, OrderItem, OrderStatusHistory
 from app.models.payments import Payment, PaymentEvent, Refund
+from app.models.rate_limit import RateLimitBucket
 
 __all__ = [
     "Address",
@@ -31,6 +32,7 @@ __all__ = [
     "Product",
     "ProductImage",
     "ProductVariant",
+    "RateLimitBucket",
     "RefreshToken",
     "Refund",
     "StoreSetting",
