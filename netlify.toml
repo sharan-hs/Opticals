@@ -1,4 +1,6 @@
+# The site lives in frontend/; publish is relative to base.
 [build]
+  base = "frontend"
   command = "npm run build"
   publish = "build"
 

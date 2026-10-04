@@ -1,18 +1,7 @@
-# dependencies
-node_modules/
-
-# builds & reports
-build/
-dist/
-coverage/
-
-# environment (commit only .env.example)
+# Each app has its own .gitignore; these apply repo-wide.
+.DS_Store
 .env
 .env.*
 !.env.example
-
-# OS / editors
-.DS_Store
 .vscode/
 .idea/
-*.log
