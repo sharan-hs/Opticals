@@ -10,9 +10,9 @@ Companion to [ARCHITECTURE_PLAN.md](ARCHITECTURE_PLAN.md). Section references li
 
 ## Progress
 
-Last updated: 2026-10-04 19:22
+Last updated: 2026-10-04 19:51
 
-_Status: Phase 3 (database) done on phase2/backend-foundation (8698019): 21 tables, 7 migrations, seed, 70 backend tests. Deployment switched to Vercel under the owner's account (docs/DEPLOYMENT.md). Next: Phase 4 auth._
+_Status: Phase 4 (accounts) done on phase2/backend-foundation (6c13491): backend 115 tests, frontend 40 tests, browser e2e 15/15. Paused for user testing (docs/PHASE4_TESTING.md)._
 
 | Phase | Done | In progress | Total | % done |
 |---|---:|---:|---:|---:|
@@ -20,7 +20,7 @@ _Status: Phase 3 (database) done on phase2/backend-foundation (8698019): 21 tabl
 | Phase 1 | 120 | 7 | 130 | 92% |
 | Phase 2 | 26 | 4 | 31 | 84% |
 | Phase 3 | 28 | 2 | 30 | 93% |
-| Phase 4 | 0 | 0 | 32 | 0% |
+| Phase 4 | 32 | 0 | 32 | 100% |
 | Phase 5 | 0 | 0 | 39 | 0% |
 | Phase 6 | 0 | 0 | 14 | 0% |
 | Phase 7 | 0 | 0 | 13 | 0% |
@@ -31,24 +31,25 @@ _Status: Phase 3 (database) done on phase2/backend-foundation (8698019): 21 tabl
 | Phase 12 | 0 | 2 | 21 | 0% |
 | P1 | 0 | 0 | 12 | 0% |
 | P2 | 0 | 0 | 7 | 0% |
-| **All** | **177** | **15** | **417** | **42%** |
+| **All** | **209** | **15** | **417** | **50%** |
 
 **Recently completed**
+- Phase 4 accounts: API + UI; end-to-end browser run register→reload→profile→address→change password→logout→login passes
+- 4.2.1–4.2.14 Frontend auth: RTK Query reauth, guards, login/register/reset, account pages, MSW tests
+- 4.1.1–4.1.18 Backend auth: Argon2, JWT, refresh rotation, addresses, email, rate limits, create-admin
 - 3.3.x Seed: categories, brands, 7 models / 11 variants, 64 images, inventory at 0, store settings
 - 3.3.8 ER diagram (docs/DATABASE.md)
 - 3.2.1–3.2.4 7 migrations, round-trip CI, models-match-migrations test, 23 constraint tests
 - 3.1.1–3.1.18 21 tables with mixins, CHECKs, indexes, lazy="raise"
 - Deployment switched to Vercel on owner's accounts (docs/DEPLOYMENT.md; 12.4/12.5 config written)
 - 2.5.1/2.5.2 pytest fixtures + backend tests (now 70)
-- 2.1–2.4 Monorepo, local env, FastAPI scaffold, Alembic
-- 1.1.8 Phase 1 committed (b261f78) and pushed
 
 **Up next**
-- Phase 4.1 Backend auth: security.py, JWT, register/login/refresh
+- 👤 User testing of Phase 4 (docs/PHASE4_TESTING.md)
+- Phase 5.1 Public catalogue API
+- Phase 5.2 Admin catalogue API
 - 👤 Open PRs; 2.5.5 enable branch protection
 - 👤 12.2 Owner accounts (GitHub transfer, Vercel Pro, Neon)
-- 👤 0.4.x Confirm Cloudinary account ownership
-- 3.3.4/3.3.5 Image dimensions + stock counts once owner provides API key / counts
 
 ---
 
@@ -80,6 +81,8 @@ Work top to bottom inside a phase unless a dependency says otherwise.
 ---
 
 ## Phase 1 — Frontend cleanup (existing React app, static data)
+
+> ✅ Phase 4 (accounts) done on phase2/backend-foundation (6c13491): backend 115 tests, frontend 40 tests, browser e2e 15/15. Paused for user testing (docs/PHASE4_TESTING.md).
 
 > ✅ Phase 3 (database) done on phase2/backend-foundation (8698019): 21 tables, 7 migrations, seed, 70 backend tests. Deployment switched to Vercel under the owner's account (docs/DEPLOYMENT.md). Next: Phase 4 auth.
 
@@ -360,40 +363,40 @@ Work top to bottom inside a phase unless a dependency says otherwise.
 ## Phase 4 — Authentication & accounts
 
 ### 4.1 Backend
-- [ ] 4.1.1 `security.py`: Argon2 hash/verify, rehash-on-login if params change
-- [ ] 4.1.2 JWT encode/decode (exp, iat, jti, type), clock-skew leeway
-- [ ] 4.1.3 Opaque token generator + SHA-256 hashing
-- [ ] 4.1.4 User repository + service
-- [ ] 4.1.5 `POST /auth/register` (email normalisation, password policy, duplicate → 409)
-- [ ] 4.1.6 `POST /auth/login` (generic errors, constant-time path for unknown email, `last_login_at`)
-- [ ] 4.1.7 Refresh token issue, rotation, reuse detection (revoke family)
-- [ ] 4.1.8 Cookie settings per environment (Secure, SameSite=Lax, Path, Domain)
-- [ ] 4.1.9 `POST /auth/refresh` (cookie + `X-Requested-With` + Origin check)
-- [ ] 4.1.10 `POST /auth/logout`, `POST /auth/logout-all`
-- [ ] 4.1.11 Dependencies `get_current_user`, `require_role`, `require_permission`; `ROLE_PERMISSIONS` map
-- [ ] 4.1.12 `GET/PATCH /me`, `POST /me/change-password` (revokes other sessions)
-- [ ] 4.1.13 Addresses CRUD + set default; Indian states list; phone/pincode validation; max 10
-- [ ] 4.1.14 Email service interface: console (dev) + provider (staging/prod); HTML + text templates
-- [ ] 4.1.15 Forgot / reset password (hashed single-use token, 30 min, generic response, revoke sessions)
-- [ ] 4.1.16 Rate limits (login, register, forgot, reset)
-- [ ] 4.1.17 `cli create-admin`
-- [ ] 4.1.18 Tests: every flow, expiry (freezegun), rotation reuse, deactivated user, 401/403, rate limits
+- [x] 4.1.1 `security.py`: Argon2 hash/verify, rehash-on-login if params change
+- [x] 4.1.2 JWT encode/decode (exp, iat, jti, type), clock-skew leeway
+- [x] 4.1.3 Opaque token generator + SHA-256 hashing
+- [x] 4.1.4 User repository + service
+- [x] 4.1.5 `POST /auth/register` (email normalisation, password policy, duplicate → 409)
+- [x] 4.1.6 `POST /auth/login` (generic errors, constant-time path for unknown email, `last_login_at`)
+- [x] 4.1.7 Refresh token issue, rotation, reuse detection (revoke family)
+- [x] 4.1.8 Cookie settings per environment (Secure, SameSite=Lax, Path, Domain) _(Secure off only in development/test; SameSite=Lax; Path=/api/v1/auth; host-only (same-origin via /api proxy))_
+- [x] 4.1.9 `POST /auth/refresh` (cookie + `X-Requested-With` + Origin check) _(also 30 s grace REFRESH_RACE for two tabs)_
+- [x] 4.1.10 `POST /auth/logout`, `POST /auth/logout-all`
+- [x] 4.1.11 Dependencies `get_current_user`, `require_role`, `require_permission`; `ROLE_PERMISSIONS` map
+- [x] 4.1.12 `GET/PATCH /me`, `POST /me/change-password` (revokes other sessions) _(change-password lives at POST /auth/change-password so the refresh cookie identifies the current session)_
+- [x] 4.1.13 Addresses CRUD + set default; Indian states list; phone/pincode validation; max 10
+- [x] 4.1.14 Email service interface: console (dev) + provider (staging/prod); HTML + text templates _(console (dev) + Resend (prod) via HTTPS; text + HTML templates)_
+- [x] 4.1.15 Forgot / reset password (hashed single-use token, 30 min, generic response, revoke sessions)
+- [x] 4.1.16 Rate limits (login, register, forgot, reset) _(counted in Postgres (rate_limit_buckets) instead of slowapi — serverless instances don't share memory)_
+- [x] 4.1.17 `cli create-admin`
+- [x] 4.1.18 Tests: every flow, expiry (freezegun), rotation reuse, deactivated user, 401/403, rate limits
 
 ### 4.2 Frontend
-- [ ] 4.2.1 `.env` `VITE_API_BASE_URL`; `api/baseApi.js` (RTK Query, `credentials: 'include'`)
-- [ ] 4.2.2 `baseQueryWithReauth` with single-flight refresh + retry; logout on refresh failure
-- [ ] 4.2.3 `authSlice` (user, accessToken, status) — token in memory only
-- [ ] 4.2.4 Session restore on app start (refresh) with loading gate
-- [ ] 4.2.5 Error mapping helper (API envelope → form errors/toasts)
-- [ ] 4.2.6 Install react-hook-form + zod
-- [ ] 4.2.7 Login page (`/login?next=`)
-- [ ] 4.2.8 Register page
-- [ ] 4.2.9 Forgot password page; Reset password page (token from URL)
-- [ ] 4.2.10 `RequireAuth`, `RequireRole` guards
-- [ ] 4.2.11 Header account menu (signed in/out states, logout)
-- [ ] 4.2.12 Account layout + Profile page + Change password page
-- [ ] 4.2.13 Addresses page (list, add, edit, delete with confirm, set default)
-- [ ] 4.2.14 Tests with MSW (login success/failure, refresh retry, guard redirect)
+- [x] 4.2.1 `.env` `VITE_API_BASE_URL`; `api/baseApi.js` (RTK Query, `credentials: 'include'`) _(same-origin /api/v1; no env var needed)_
+- [x] 4.2.2 `baseQueryWithReauth` with single-flight refresh + retry; logout on refresh failure
+- [x] 4.2.3 `authSlice` (user, accessToken, status) — token in memory only
+- [x] 4.2.4 Session restore on app start (refresh) with loading gate
+- [x] 4.2.5 Error mapping helper (API envelope → form errors/toasts)
+- [x] 4.2.6 Install react-hook-form + zod _(react-hook-form 7 + zod 4)_
+- [x] 4.2.7 Login page (`/login?next=`)
+- [x] 4.2.8 Register page
+- [x] 4.2.9 Forgot password page; Reset password page (token from URL)
+- [x] 4.2.10 `RequireAuth`, `RequireRole` guards
+- [x] 4.2.11 Header account menu (signed in/out states, logout)
+- [x] 4.2.12 Account layout + Profile page + Change password page
+- [x] 4.2.13 Addresses page (list, add, edit, delete with confirm, set default)
+- [x] 4.2.14 Tests with MSW (login success/failure, refresh retry, guard redirect) _(MSW 2)_
 - **Done when:** register → login → reload keeps session → logout; admin user can be created from CLI.
 
 ---
