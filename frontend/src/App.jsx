@@ -1,5 +1,5 @@
 import React, { Suspense, lazy } from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 
 import "./App.css";
@@ -10,7 +10,7 @@ import Footer from "./Components/Footer/Footer";
 import ScrollToTop from "./Components/ScrollButton/ScrollToTop";
 import ScrollToTopOnNavigate from "./Components/ScrollButton/ScrollToTopOnNavigate";
 import PageLoading from "./Components/PageLoading/PageLoading";
-import { RequireAuth, useSessionRestore } from "./Features/Auth/guards";
+import { RequireAuth, RequireRole, useSessionRestore } from "./Features/Auth/guards";
 
 // Every page except the landing page is downloaded on first visit.
 const About = lazy(() => import("./Pages/About"));
@@ -26,13 +26,29 @@ const AccountLayout = lazy(() => import("./Components/Account/AccountLayout"));
 const ProfilePage = lazy(() => import("./Components/Account/ProfilePage"));
 const AddressesPage = lazy(() => import("./Components/Account/AddressesPage"));
 const SecurityPage = lazy(() => import("./Components/Account/SecurityPage"));
+// Separate bundle; downloaded only when an admin opens /admin.
+const AdminApp = lazy(() => import("./Admin/AdminApp"));
 const LegalPage = lazy(() => import("./Components/Terms/LegalPage"));
 const ShoppingCart = lazy(() => import("./Components/ShoppingCart/ShoppingCart"));
 
-const App = () => {
+// Storefront pages share the header and footer; /admin has its own layout.
+const Shell = () => {
   useSessionRestore();
+  const { pathname } = useLocation();
+
+  if (pathname.startsWith("/admin")) {
+    return (
+      <Suspense fallback={<PageLoading />}>
+        <RequireRole roles={["ADMIN"]}>
+          <AdminApp />
+        </RequireRole>
+        <Toaster />
+      </Suspense>
+    );
+  }
+
   return (
-    <BrowserRouter>
+    <>
       <ScrollToTopOnNavigate />
       <ScrollToTop />
       <Header />
@@ -75,8 +91,14 @@ const App = () => {
       </main>
       <Footer />
       <Toaster />
-    </BrowserRouter>
+    </>
   );
 };
+
+const App = () => (
+  <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+    <Shell />
+  </BrowserRouter>
+);
 
 export default App;

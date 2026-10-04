@@ -6,38 +6,56 @@ import { FaAngleRight, FaAngleLeft } from "react-icons/fa6";
 import { BiSearch } from "react-icons/bi";
 
 import Filter from "../Filters/Filter";
-import ProductCard from "../../ProductCard/ProductCard";
-import { getProducts } from "../../../Data/catalog";
+import ProductCard, { ProductCardSkeleton } from "../../ProductCard/ProductCard";
+import { errorMessage } from "../../../Api/errors";
+import { useGetFacetsQuery, useGetProductsQuery } from "../../../Features/Catalog/catalogApi";
 import { formatINR } from "../../../Utils/format";
 import {
+  PAGE_SIZE,
   SORT_OPTIONS,
-  filterProducts,
-  getFacets,
   hasActiveFilters,
-  paginate,
   parseFilters,
-  sortProducts,
+  toFacetParams,
+  toProductParams,
   toSearchParams,
 } from "../shopFilters";
 
-const ActiveFilterChips = ({ filters, onChange }) => {
+const EMPTY_FACETS = {
+  categories: [],
+  brands: [],
+  colors: [],
+  genders: [],
+  frame_shapes: [],
+  frame_types: [],
+  materials: [],
+  price: null,
+};
+
+const labelFor = (options, value) => options.find((o) => o.value === value)?.label ?? value;
+
+const ActiveFilterChips = ({ filters, facets, onChange }) => {
+  const listChips = (key, options) =>
+    filters[key].map((value) => ({
+      label: labelFor(options, value),
+      changes: { [key]: filters[key].filter((v) => v !== value) },
+    }));
   const chips = [
     filters.q && { label: `“${filters.q}”`, changes: { q: "" } },
-    filters.category && { label: filters.category, changes: { category: "" } },
-    ...filters.brands.map((brand) => ({
-      label: brand,
-      changes: { brands: filters.brands.filter((b) => b !== brand) },
-    })),
-    ...filters.colors.map((color) => ({
-      label: color,
-      changes: { colors: filters.colors.filter((c) => c !== color) },
-    })),
+    filters.category && {
+      label: labelFor(facets.categories, filters.category),
+      changes: { category: "" },
+    },
+    ...listChips("brands", facets.brands),
+    ...listChips("colors", facets.colors),
+    ...listChips("shapes", facets.frame_shapes),
+    ...listChips("genders", facets.genders),
     (filters.minPrice !== null || filters.maxPrice !== null) && {
       label: `${formatINR(filters.minPrice ?? 0)} – ${
         filters.maxPrice !== null ? formatINR(filters.maxPrice) : "any"
       }`,
       changes: { minPrice: null, maxPrice: null },
     },
+    filters.inStock && { label: "In stock", changes: { inStock: false } },
   ].filter(Boolean);
 
   if (!chips.length) return null;
@@ -65,8 +83,9 @@ const ShopDetails = () => {
   const drawerCloseRef = useRef(null);
   const drawerWasOpen = useRef(false);
 
-  const products = getProducts();
-  const facets = useMemo(() => getFacets(products), [products]);
+  const productsQuery = useGetProductsQuery(toProductParams(filters));
+  const { data: facetData } = useGetFacetsQuery(toFacetParams(filters));
+  const facets = facetData ?? EMPTY_FACETS;
 
   useEffect(() => {
     setSearchText(filters.q);
@@ -78,12 +97,11 @@ const ShopDetails = () => {
 
   const clearAllFilters = () => setSearchParams({});
 
-  const matchingProducts = filterProducts(products, filters);
-  const resultCount = matchingProducts.length;
-  const { items, currentPage, totalPages } = paginate(
-    sortProducts(matchingProducts, filters.sort),
-    filters.page
-  );
+  const page = productsQuery.data;
+  const items = page?.items ?? [];
+  const resultCount = page?.total ?? 0;
+  const currentPage = page?.page ?? filters.page;
+  const totalPages = page?.total_pages ?? 0;
 
   const goToPage = (page) => {
     updateFilters({ page });
@@ -207,13 +225,32 @@ const ShopDetails = () => {
             </div>
           </div>
 
-          <ActiveFilterChips filters={filters} onChange={updateFilters} />
+          <ActiveFilterChips filters={filters} facets={facets} onChange={updateFilters} />
           <p className="shopResultCount" aria-live="polite">
-            {resultCount} {resultCount === 1 ? "product" : "products"}
+            {productsQuery.isLoading
+              ? "Loading products…"
+              : `${resultCount} ${resultCount === 1 ? "product" : "products"}`}
           </p>
 
-          {items.length > 0 ? (
-            <div className="shopDetailsProductsContainer">
+          {productsQuery.isError ? (
+            <div className="shopEmptyState" role="alert">
+              <h3>We couldn’t load the products</h3>
+              <p>{errorMessage(productsQuery.error)}</p>
+              <button type="button" onClick={() => productsQuery.refetch()}>
+                Try again
+              </button>
+            </div>
+          ) : productsQuery.isLoading ? (
+            <div className="shopDetailsProductsContainer" aria-busy="true">
+              {Array.from({ length: PAGE_SIZE / 2 }, (_, index) => (
+                <ProductCardSkeleton key={index} />
+              ))}
+            </div>
+          ) : items.length > 0 ? (
+            <div
+              className={`shopDetailsProductsContainer ${productsQuery.isFetching ? "isRefreshing" : ""}`}
+              aria-busy={productsQuery.isFetching}
+            >
               {items.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}

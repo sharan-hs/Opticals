@@ -116,6 +116,7 @@ const AccountMenu = () => {
           <p>Hi, {user.full_name.split(" ")[0]}</p>
           <Link to="/account">My account</Link>
           <Link to="/account/addresses">Addresses</Link>
+          {user.role === "ADMIN" && <Link to="/admin">Shop admin</Link>}
           <button type="button" onClick={signOut}>
             Log out
           </button>

@@ -4,70 +4,61 @@ import Tooltip from "@mui/material/Tooltip";
 import Zoom from "@mui/material/Zoom";
 import { GoChevronLeft, GoChevronRight } from "react-icons/go";
 
-import { getColorSiblings } from "../../../Data/catalog";
+import { AVAILABILITY_LABELS } from "../../../Features/Catalog/colors";
 import { MAX_QUANTITY } from "../../../Features/Cart/cartSlice";
-import { useAddToCart } from "../../../Features/Cart/useAddToCart";
-import {
-  cloudinarySrcSet,
-  cloudinaryUrl,
-  productImageIds,
-} from "../../../Utils/cloudinary";
-import { formatINR } from "../../../Utils/format";
+import { cartLineFor, useAddToCart } from "../../../Features/Cart/useAddToCart";
+import { cloudinarySrcSet, imageUrl } from "../../../Utils/cloudinary";
+import { formatPaise } from "../../../Utils/format";
 
 import "./Product.css";
 
-const Product = ({ product }) => {
+// `product` is ProductDetail from the API; `variant` the selected colour.
+const Product = ({ product, variant, onSelectVariant }) => {
   const addToCart = useAddToCart();
   const [currentImg, setCurrentImg] = useState(0);
   const [quantity, setQuantity] = useState(1);
 
-  const imageIds = productImageIds(product);
-  const version = product.imageVersion;
-  const colorSiblings = getColorSiblings(product);
-  const fullName = `${product.brand} ${product.name}`;
+  const images = [...variant.images, ...product.images];
+  const image = images[currentImg];
+  const fullName = `${product.brand.name} ${product.name}`;
+  const soldOut = variant.availability === "out";
 
-  const showImage = (index) =>
-    setCurrentImg((index + imageIds.length) % imageIds.length);
-
-  const setClampedQuantity = (value) =>
-    setQuantity(Math.min(MAX_QUANTITY, Math.max(1, value)));
+  const showImage = (index) => setCurrentImg((index + images.length) % images.length);
+  const setClampedQuantity = (value) => setQuantity(Math.min(MAX_QUANTITY, Math.max(1, value)));
 
   return (
     <div className="productSection">
       <div className="productShowCase">
         <div className="productGallery">
           <div className="productThumb">
-            {imageIds.map((publicId, index) => (
+            {images.map((thumb, index) => (
               <button
                 type="button"
-                key={publicId}
+                key={thumb.id}
                 onClick={() => setCurrentImg(index)}
-                aria-label={`Show image ${index + 1} of ${imageIds.length}`}
+                aria-label={`Show image ${index + 1} of ${images.length}`}
                 aria-current={index === currentImg}
               >
-                <img
-                  src={cloudinaryUrl(publicId, { width: 160, version })}
-                  alt=""
-                  width={80}
-                  height={80}
-                />
+                <img src={imageUrl(thumb, 160)} alt="" width={80} height={80} />
               </button>
             ))}
           </div>
 
           <div className="productFullImg">
-            <img
-              src={cloudinaryUrl(imageIds[currentImg], { width: 1000, version })}
-              srcSet={cloudinarySrcSet(imageIds[currentImg], [500, 1000], {
-                version,
-              })}
-              sizes="(max-width: 991px) 100vw, 520px"
-              alt={`${fullName}, view ${currentImg + 1} of ${imageIds.length}`}
-              width={520}
-              height={520}
-            />
+            {image ? (
+              <img
+                src={imageUrl(image, 1000)}
+                srcSet={cloudinarySrcSet(image.public_id, [500, 1000], { version: image.version })}
+                sizes="(max-width: 991px) 100vw, 520px"
+                alt={image.alt_text || `${fullName} in ${variant.color_name}, view ${currentImg + 1}`}
+                width={520}
+                height={520}
+              />
+            ) : (
+              <div className="imagePlaceholder" style={{ aspectRatio: "1" }} />
+            )}
 
-            {imageIds.length > 1 && (
+            {images.length > 1 && (
               <div className="buttonsGroup">
                 <button
                   type="button"
@@ -95,8 +86,8 @@ const Product = ({ product }) => {
             <div className="breadcrumbLink">
               <Link to="/">Home</Link>&nbsp;/&nbsp;
               <Link to="/shop">The Shop</Link>&nbsp;/&nbsp;
-              <Link to={`/shop?category=${encodeURIComponent(product.category)}`}>
-                {product.category}
+              <Link to={`/shop?category=${encodeURIComponent(product.category.slug)}`}>
+                {product.category.name}
               </Link>
               &nbsp;/&nbsp;
               <span aria-current="page">{product.name}</span>
@@ -104,35 +95,48 @@ const Product = ({ product }) => {
           </nav>
 
           <div className="productName">
-            <p className="productBrand">{product.brand}</p>
+            <p className="productBrand">{product.brand.name}</p>
             <h1>{product.name}</h1>
           </div>
 
           <div className="productPrice">
-            <h3>{formatINR(product.price)}</h3>
+            <h3>
+              {formatPaise(variant.price_paise)}
+              {variant.discount_pct > 0 && (
+                <>
+                  {" "}
+                  <s className="productMrp">MRP {formatPaise(variant.mrp_paise)}</s>{" "}
+                  <span className="productDiscount">{variant.discount_pct}% off</span>
+                </>
+              )}
+            </h3>
             <p>Inclusive of all taxes</p>
           </div>
 
-          {colorSiblings.length > 1 && (
+          <p className={`productAvailability ${variant.availability}`} role="status">
+            {AVAILABILITY_LABELS[variant.availability]}
+          </p>
+
+          {product.variants.length > 1 && (
             <div className="productSizeColor">
               <div className="productColor">
                 <p>
-                  Colour: <span>{product.color}</span>
+                  Colour: <span>{variant.color_name}</span>
                 </p>
-                <div className="colorBtn">
-                  {colorSiblings.map((sibling) => (
-                    <Tooltip
-                      key={sibling.id}
-                      title={sibling.color}
-                      TransitionComponent={Zoom}
-                    >
-                      <Link
-                        to={`/products/${sibling.slug}`}
-                        replace
-                        className={sibling.id === product.id ? "highlighted" : ""}
-                        style={{ backgroundColor: sibling.colorHex }}
-                        aria-label={`Colour: ${sibling.color}`}
-                        aria-current={sibling.id === product.id ? "true" : undefined}
+                <div className="colorBtn" role="group" aria-label="Choose a colour">
+                  {product.variants.map((option) => (
+                    <Tooltip key={option.id} title={option.color_name} TransitionComponent={Zoom}>
+                      <button
+                        type="button"
+                        onClick={() => onSelectVariant(option.sku)}
+                        className={`${option.id === variant.id ? "highlighted" : ""} ${
+                          option.availability === "out" ? "soldOut" : ""
+                        }`}
+                        style={{ backgroundColor: option.color_hex ?? "#ccc" }}
+                        aria-label={`${option.color_name}${
+                          option.availability === "out" ? " (out of stock)" : ""
+                        }`}
+                        aria-pressed={option.id === variant.id}
                       />
                     </Tooltip>
                   ))}
@@ -146,7 +150,7 @@ const Product = ({ product }) => {
               <button
                 type="button"
                 onClick={() => setClampedQuantity(quantity - 1)}
-                disabled={quantity <= 1}
+                disabled={quantity <= 1 || soldOut}
                 aria-label="Decrease quantity"
               >
                 -
@@ -157,6 +161,7 @@ const Product = ({ product }) => {
                 min={1}
                 max={MAX_QUANTITY}
                 value={quantity}
+                disabled={soldOut}
                 aria-label="Quantity"
                 onChange={(event) => {
                   const value = parseInt(event.target.value, 10);
@@ -166,7 +171,7 @@ const Product = ({ product }) => {
               <button
                 type="button"
                 onClick={() => setClampedQuantity(quantity + 1)}
-                disabled={quantity >= MAX_QUANTITY}
+                disabled={quantity >= MAX_QUANTITY || soldOut}
                 aria-label="Increase quantity"
               >
                 +
@@ -174,24 +179,30 @@ const Product = ({ product }) => {
             </div>
 
             <div className="productCartBtn">
-              <button type="button" onClick={() => addToCart(product, quantity)}>
-                Add to Cart
+              <button
+                type="button"
+                disabled={soldOut}
+                onClick={() =>
+                  addToCart(cartLineFor(product, { ...variant, image: variant.images[0] ?? product.images[0] }), quantity)
+                }
+              >
+                {soldOut ? "Out of stock" : "Add to Cart"}
               </button>
             </div>
           </div>
 
           <div className="productTags">
             <p>
-              <span>PRODUCT CODE: </span>
-              {product.id.toUpperCase()}
+              <span>SKU: </span>
+              {variant.sku}
             </p>
             <p>
               <span>CATEGORY: </span>
-              {product.category}
+              {product.category.name}
             </p>
             <p>
               <span>BRAND: </span>
-              {product.brand}
+              {product.brand.name}
             </p>
           </div>
         </div>

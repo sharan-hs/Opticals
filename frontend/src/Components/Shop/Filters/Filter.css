@@ -193,3 +193,14 @@
   color: #000;
   text-decoration: underline;
 }
+.stockToggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 0 6px;
+  font-size: 17px;
+}
+
+.stockToggle label {
+  cursor: pointer;
+}

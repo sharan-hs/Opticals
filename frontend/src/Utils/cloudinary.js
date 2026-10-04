@@ -18,15 +18,6 @@ export const cloudinarySrcSet = (publicId, widths, { version } = {}) =>
     .map((width) => `${cloudinaryUrl(publicId, { width, version })} ${width}w`)
     .join(", ");
 
-// Public IDs of a catalogue product's images, in display order.
-export const productImageIds = (product) =>
-  Array.from(
-    { length: product.imageCount },
-    (_, i) => `Products/${product.id}/${product.id}_${i + 1}.png`
-  );
-
-export const productImageUrl = (product, index = 0, width) =>
-  cloudinaryUrl(productImageIds(product)[index], {
-    width,
-    version: product.imageVersion,
-  });
+// Image objects from the API: { public_id, version, alt_text, ... }.
+export const imageUrl = (image, width) =>
+  image ? cloudinaryUrl(image.public_id, { width, version: image.version }) : null;

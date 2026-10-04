@@ -54,7 +54,8 @@ class TestListing:
         ]
         assert card["image"]["public_id"] == "Products/orb4349_brown/orb4349_brown_1"
         assert card["availability"] == "out"
-        assert response.headers["Cache-Control"].startswith("public")
+        assert response.headers["Cache-Control"] == "public, max-age=0, must-revalidate"
+        assert response.headers["CDN-Cache-Control"].startswith("public, max-age=60")
 
     def test_hidden_products(self, client: TestClient, db: Session) -> None:
         sunglasses = db.scalar(select(Category).where(Category.slug == "sunglasses"))

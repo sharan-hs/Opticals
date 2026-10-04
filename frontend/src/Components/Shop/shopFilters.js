@@ -1,17 +1,26 @@
-// Pure helpers for the shop page. Filter state lives in the URL query
-// string so results can be shared, refreshed and navigated with Back.
+// Shop filter state lives in the URL query string so results can be shared,
+// refreshed and navigated with Back. These helpers translate between the URL
+// and the API's query parameters.
 
 export const PAGE_SIZE = 12;
 
 export const SORT_OPTIONS = [
   { value: "featured", label: "Featured" },
-  { value: "price-asc", label: "Price, low to high" },
-  { value: "price-desc", label: "Price, high to low" },
-  { value: "name-asc", label: "Alphabetically, A-Z" },
-  { value: "name-desc", label: "Alphabetically, Z-A" },
+  { value: "newest", label: "Newest" },
+  { value: "price_asc", label: "Price, low to high" },
+  { value: "price_desc", label: "Price, high to low" },
+  { value: "name_asc", label: "Alphabetically, A-Z" },
+  { value: "name_desc", label: "Alphabetically, Z-A" },
 ];
 
 const SORT_VALUES = SORT_OPTIONS.map((option) => option.value);
+// Links from the old site used hyphens.
+const LEGACY_SORTS = {
+  "price-asc": "price_asc",
+  "price-desc": "price_desc",
+  "name-asc": "name_asc",
+  "name-desc": "name_desc",
+};
 
 const parseList = (value) =>
   value ? value.split(",").map((item) => item.trim()).filter(Boolean) : [];
@@ -19,19 +28,23 @@ const parseList = (value) =>
 const parseNumber = (value) => {
   if (value === null || value === "") return null;
   const number = Number(value);
-  return Number.isFinite(number) && number >= 0 ? number : null;
+  return Number.isFinite(number) && number >= 0 ? Math.round(number) : null;
 };
 
 export const parseFilters = (searchParams) => {
   const page = parseInt(searchParams.get("page"), 10);
-  const sort = searchParams.get("sort");
+  const rawSort = searchParams.get("sort");
+  const sort = LEGACY_SORTS[rawSort] ?? rawSort;
   return {
     q: (searchParams.get("q") || "").trim(),
     category: searchParams.get("category") || "",
     brands: parseList(searchParams.get("brand")),
-    colors: parseList(searchParams.get("color")),
+    colors: parseList(searchParams.get("color")).map((c) => c.toUpperCase()),
+    genders: parseList(searchParams.get("gender")).map((g) => g.toUpperCase()),
+    shapes: parseList(searchParams.get("shape")).map((s) => s.toUpperCase()),
     minPrice: parseNumber(searchParams.get("min")),
     maxPrice: parseNumber(searchParams.get("max")),
+    inStock: searchParams.get("stock") === "1",
     sort: SORT_VALUES.includes(sort) ? sort : "featured",
     page: Number.isInteger(page) && page > 0 ? page : 1,
   };
@@ -43,86 +56,36 @@ export const toSearchParams = (filters) => {
   if (filters.q) params.q = filters.q;
   if (filters.category) params.category = filters.category;
   if (filters.brands.length) params.brand = filters.brands.join(",");
-  if (filters.colors.length) params.color = filters.colors.join(",");
+  if (filters.colors.length) params.color = filters.colors.join(",").toLowerCase();
+  if (filters.genders.length) params.gender = filters.genders.join(",").toLowerCase();
+  if (filters.shapes.length) params.shape = filters.shapes.join(",").toLowerCase();
   if (filters.minPrice !== null) params.min = String(filters.minPrice);
   if (filters.maxPrice !== null) params.max = String(filters.maxPrice);
+  if (filters.inStock) params.stock = "1";
   if (filters.sort !== "featured") params.sort = filters.sort;
   if (filters.page > 1) params.page = String(filters.page);
   return params;
 };
 
-const searchableText = (product) =>
-  [product.brand, product.name, product.model, product.color, product.category]
-    .join(" ")
-    .toLowerCase();
+// Filters for /products/facets (no sort/page).
+export const toFacetParams = (filters) => ({
+  q: filters.q || undefined,
+  category: filters.category || undefined,
+  brand: filters.brands,
+  color: filters.colors,
+  gender: filters.genders,
+  frame_shape: filters.shapes,
+  min_price: filters.minPrice ?? undefined,
+  max_price: filters.maxPrice ?? undefined,
+  in_stock: filters.inStock || undefined,
+});
 
-export const filterProducts = (products, filters) => {
-  const terms = filters.q.toLowerCase().split(/\s+/).filter(Boolean);
-  return products.filter(
-    (product) =>
-      terms.every((term) => searchableText(product).includes(term)) &&
-      (!filters.category || product.category === filters.category) &&
-      (!filters.brands.length || filters.brands.includes(product.brand)) &&
-      (!filters.colors.length || filters.colors.includes(product.color)) &&
-      (filters.minPrice === null || product.price >= filters.minPrice) &&
-      (filters.maxPrice === null || product.price <= filters.maxPrice)
-  );
-};
-
-export const sortProducts = (products, sort) => {
-  const sorted = [...products];
-  switch (sort) {
-    case "price-asc":
-      return sorted.sort((a, b) => a.price - b.price);
-    case "price-desc":
-      return sorted.sort((a, b) => b.price - a.price);
-    case "name-asc":
-      return sorted.sort((a, b) => a.name.localeCompare(b.name));
-    case "name-desc":
-      return sorted.sort((a, b) => b.name.localeCompare(a.name));
-    default:
-      return sorted; // catalogue order
-  }
-};
-
-export const paginate = (items, page, pageSize = PAGE_SIZE) => {
-  const totalPages = Math.max(1, Math.ceil(items.length / pageSize));
-  const currentPage = Math.min(page, totalPages);
-  return {
-    items: items.slice((currentPage - 1) * pageSize, currentPage * pageSize),
-    currentPage,
-    totalPages,
-  };
-};
-
-const countBy = (products, key) => {
-  const counts = new Map();
-  products.forEach((product) =>
-    counts.set(product[key], (counts.get(product[key]) || 0) + 1)
-  );
-  return [...counts.entries()].map(([value, count]) => ({ value, count }));
-};
-
-// Options shown in the filter panel, derived from the catalogue itself.
-export const getFacets = (products) => {
-  const prices = products.map((product) => product.price);
-  const colorHex = Object.fromEntries(
-    products.map((product) => [product.color, product.colorHex])
-  );
-  return {
-    categories: countBy(products, "category"),
-    brands: countBy(products, "brand"),
-    colors: countBy(products, "color").map((color) => ({
-      ...color,
-      hex: colorHex[color.value],
-    })),
-    price: {
-      // Rounded outwards to the nearest ₹500 for a tidy slider.
-      min: prices.length ? Math.floor(Math.min(...prices) / 500) * 500 : 0,
-      max: prices.length ? Math.ceil(Math.max(...prices) / 500) * 500 : 0,
-    },
-  };
-};
+export const toProductParams = (filters) => ({
+  ...toFacetParams(filters),
+  sort: filters.q && filters.sort === "featured" ? "relevance" : filters.sort,
+  page: filters.page,
+  page_size: PAGE_SIZE,
+});
 
 export const hasActiveFilters = (filters) =>
   Boolean(
@@ -130,6 +93,9 @@ export const hasActiveFilters = (filters) =>
       filters.category ||
       filters.brands.length ||
       filters.colors.length ||
+      filters.genders.length ||
+      filters.shapes.length ||
       filters.minPrice !== null ||
-      filters.maxPrice !== null
+      filters.maxPrice !== null ||
+      filters.inStock
   );

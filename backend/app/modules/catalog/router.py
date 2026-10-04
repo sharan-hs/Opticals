@@ -18,9 +18,16 @@ from app.modules.catalog.schemas import (
 
 router = APIRouter(tags=["catalogue"])
 
-# Short shared caching: stock and prices change, but not by the second.
-PUBLIC_CACHE = "public, max-age=60, stale-while-revalidate=300"
-STATIC_CACHE = "public, max-age=300, stale-while-revalidate=600"
+# Browsers always re-check (an admin sees their own edit at once); the CDN
+# (Vercel honours CDN-Cache-Control, RFC 9213) serves a copy at most a minute old.
+BROWSER_CACHE = "public, max-age=0, must-revalidate"
+PUBLIC_CDN_CACHE = "public, max-age=60, stale-while-revalidate=300"
+STATIC_CDN_CACHE = "public, max-age=300, stale-while-revalidate=600"
+
+
+def _cache(response: Response, cdn_policy: str = PUBLIC_CDN_CACHE) -> None:
+    response.headers["Cache-Control"] = BROWSER_CACHE
+    response.headers["CDN-Cache-Control"] = cdn_policy
 MAX_STOREFRONT_PAGE = 48
 
 
@@ -64,20 +71,20 @@ def list_products(
     page: Annotated[int, Query(ge=1)] = 1,
     page_size: Annotated[int, Query(ge=1, le=MAX_STOREFRONT_PAGE)] = 12,
 ) -> Page[ProductCard]:
-    response.headers["Cache-Control"] = PUBLIC_CACHE
+    _cache(response)
     return service.list_products(db, filters, sort, PageParams(page=page, page_size=page_size))
 
 
 @router.get("/products/facets")
 def product_facets(db: DbSession, response: Response, filters: CatalogueFilters) -> Facets:
     """Filter options with how many products each would show."""
-    response.headers["Cache-Control"] = PUBLIC_CACHE
+    _cache(response)
     return service.facets(db, filters)
 
 
 @router.get("/products/{slug}")
 def get_product(slug: str, db: DbSession, response: Response) -> ProductDetail:
-    response.headers["Cache-Control"] = PUBLIC_CACHE
+    _cache(response)
     return service.get_product(db, slug)
 
 
@@ -88,17 +95,17 @@ def related_products(
     response: Response,
     limit: Annotated[int, Query(ge=1, le=12)] = 8,
 ) -> list[ProductCard]:
-    response.headers["Cache-Control"] = PUBLIC_CACHE
+    _cache(response)
     return service.related_products(db, slug, limit)
 
 
 @router.get("/categories")
 def categories(db: DbSession, response: Response) -> list[CategoryNode]:
-    response.headers["Cache-Control"] = STATIC_CACHE
+    _cache(response, STATIC_CDN_CACHE)
     return service.category_tree(db)
 
 
 @router.get("/brands")
 def brands(db: DbSession, response: Response) -> list[BrandRef]:
-    response.headers["Cache-Control"] = STATIC_CACHE
+    _cache(response, STATIC_CDN_CACHE)
     return service.brands(db)

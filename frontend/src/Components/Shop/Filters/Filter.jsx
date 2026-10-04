@@ -7,6 +7,7 @@ import Slider from "@mui/material/Slider";
 import { IoIosArrowDown } from "react-icons/io";
 
 import { formatINR } from "../../../Utils/format";
+import { COLOR_SWATCHES } from "../../../Features/Catalog/colors";
 
 const FilterGroup = ({ title, children, onClear }) => (
   <Accordion defaultExpanded disableGutters elevation={0}>
@@ -30,13 +31,40 @@ const FilterGroup = ({ title, children, onClear }) => (
 const toggle = (list, value) =>
   list.includes(value) ? list.filter((item) => item !== value) : [...list, value];
 
-// Controlled filter panel: all state lives in the parent (URL query string).
+const roundDown = (value) => Math.floor(value / 500) * 500;
+const roundUp = (value) => Math.ceil(value / 500) * 500;
+
+// Checkbox list with counts, e.g. brands, gender, shape.
+const CheckboxGroup = ({ name, options, selected, onToggle }) => (
+  <div className="brandList">
+    {options.map(({ value, label, count }) => {
+      const id = `${name}-${value}`.toLowerCase().replace(/\W+/g, "-");
+      return (
+        <div className="brandItem" key={value}>
+          <input
+            id={id}
+            type="checkbox"
+            className="brandRadio"
+            checked={selected.includes(value)}
+            onChange={() => onToggle(value)}
+          />
+          <label className="brandLabel" htmlFor={id}>
+            {label}
+          </label>
+          <span className="brandCount">{count}</span>
+        </div>
+      );
+    })}
+  </div>
+);
+
+// Controlled filter panel: all state lives in the parent (URL query string);
+// options and counts come from /products/facets.
 const Filter = ({ facets, filters, onChange, onClearAll }) => {
-  const priceBounds = [facets.price.min, facets.price.max];
-  const appliedPrice = [
-    filters.minPrice ?? priceBounds[0],
-    filters.maxPrice ?? priceBounds[1],
-  ];
+  const bounds = facets.price
+    ? [roundDown(facets.price.min), roundUp(facets.price.max)]
+    : [0, 0];
+  const appliedPrice = [filters.minPrice ?? bounds[0], filters.maxPrice ?? bounds[1]];
   const [price, setPrice] = useState(appliedPrice);
 
   // Keep the slider in sync when the URL changes (Back button, Clear all).
@@ -47,8 +75,8 @@ const Filter = ({ facets, filters, onChange, onClearAll }) => {
 
   const commitPrice = (_, [min, max]) =>
     onChange({
-      minPrice: min > priceBounds[0] ? min : null,
-      maxPrice: max < priceBounds[1] ? max : null,
+      minPrice: min > bounds[0] ? min : null,
+      maxPrice: max < bounds[1] ? max : null,
     });
 
   const priceActive = filters.minPrice !== null || filters.maxPrice !== null;
@@ -61,13 +89,24 @@ const Filter = ({ facets, filters, onChange, onClearAll }) => {
         </button>
       </div>
 
+      <div className="stockToggle">
+        <input
+          id="filter-in-stock"
+          type="checkbox"
+          className="brandRadio"
+          checked={filters.inStock}
+          onChange={() => onChange({ inStock: !filters.inStock })}
+        />
+        <label htmlFor="filter-in-stock">In stock only</label>
+      </div>
+
       <FilterGroup
         title="Product Categories"
         onClear={filters.category && (() => onChange({ category: "" }))}
       >
         <ul className="filterOptionList">
-          {[{ value: "", count: null }, ...facets.categories].map(
-            ({ value, count }) => (
+          {[{ value: "", label: "All", count: null }, ...facets.categories].map(
+            ({ value, label, count }) => (
               <li key={value || "all"}>
                 <button
                   type="button"
@@ -75,7 +114,7 @@ const Filter = ({ facets, filters, onChange, onClearAll }) => {
                   aria-pressed={filters.category === value}
                   onClick={() => onChange({ category: value })}
                 >
-                  {value || "All"}
+                  {label}
                   {count !== null && <span className="brandCount">{count}</span>}
                 </button>
               </li>
@@ -84,94 +123,109 @@ const Filter = ({ facets, filters, onChange, onClearAll }) => {
         </ul>
       </FilterGroup>
 
-      <FilterGroup
-        title="Color"
-        onClear={filters.colors.length > 0 && (() => onChange({ colors: [] }))}
-      >
-        <div className="colorPills">
-          {facets.colors.map(({ value, hex }) => (
-            <button
-              type="button"
-              key={value}
-              className={`colorPill ${
-                filters.colors.includes(value) ? "selected" : ""
-              }`}
-              aria-pressed={filters.colors.includes(value)}
-              onClick={() => onChange({ colors: toggle(filters.colors, value) })}
-            >
-              <span
-                className="colorDot"
-                style={{ backgroundColor: hex || "#ccc" }}
-                aria-hidden="true"
-              />
-              <span className="colorLabel">{value}</span>
-            </button>
-          ))}
-        </div>
-      </FilterGroup>
-
-      <FilterGroup
-        title="Brands"
-        onClear={filters.brands.length > 0 && (() => onChange({ brands: [] }))}
-      >
-        <div className="brandList">
-          {facets.brands.map(({ value, count }) => {
-            const id = `brand-${value.replace(/\W+/g, "-").toLowerCase()}`;
-            return (
-              <div className="brandItem" key={value}>
-                <input
-                  id={id}
-                  type="checkbox"
-                  className="brandRadio"
-                  checked={filters.brands.includes(value)}
-                  onChange={() =>
-                    onChange({ brands: toggle(filters.brands, value) })
-                  }
+      {facets.colors.length > 0 && (
+        <FilterGroup
+          title="Color"
+          onClear={filters.colors.length > 0 && (() => onChange({ colors: [] }))}
+        >
+          <div className="colorPills">
+            {facets.colors.map(({ value, label, count }) => (
+              <button
+                type="button"
+                key={value}
+                className={`colorPill ${filters.colors.includes(value) ? "selected" : ""}`}
+                aria-pressed={filters.colors.includes(value)}
+                aria-label={`${label} (${count})`}
+                onClick={() => onChange({ colors: toggle(filters.colors, value) })}
+              >
+                <span
+                  className="colorDot"
+                  style={{ background: COLOR_SWATCHES[value] ?? "#ccc" }}
+                  aria-hidden="true"
                 />
-                <label className="brandLabel" htmlFor={id}>
-                  {value}
-                </label>
-                <span className="brandCount">{count}</span>
-              </div>
-            );
-          })}
-        </div>
-      </FilterGroup>
+                <span className="colorLabel">{label}</span>
+              </button>
+            ))}
+          </div>
+        </FilterGroup>
+      )}
 
-      <FilterGroup
-        title="Price"
-        onClear={
-          priceActive && (() => onChange({ minPrice: null, maxPrice: null }))
-        }
-      >
-        <Slider
-          value={price}
-          onChange={(_, value) => setPrice(value)}
-          onChangeCommitted={commitPrice}
-          min={priceBounds[0]}
-          max={priceBounds[1]}
-          step={500}
-          valueLabelDisplay="auto"
-          valueLabelFormat={formatINR}
-          getAriaLabel={(index) => (index === 0 ? "Minimum price" : "Maximum price")}
-          getAriaValueText={formatINR}
-          sx={{
-            color: "black",
-            "& .MuiSlider-thumb": {
-              backgroundColor: "white",
-              border: "2px solid black",
-            },
-          }}
-        />
-        <div className="priceRange">
-          <p>
-            Min: <span>{formatINR(price[0])}</span>
-          </p>
-          <p>
-            Max: <span>{formatINR(price[1])}</span>
-          </p>
-        </div>
-      </FilterGroup>
+      {facets.brands.length > 0 && (
+        <FilterGroup
+          title="Brands"
+          onClear={filters.brands.length > 0 && (() => onChange({ brands: [] }))}
+        >
+          <CheckboxGroup
+            name="brand"
+            options={facets.brands}
+            selected={filters.brands}
+            onToggle={(value) => onChange({ brands: toggle(filters.brands, value) })}
+          />
+        </FilterGroup>
+      )}
+
+      {facets.frame_shapes.length > 0 && (
+        <FilterGroup
+          title="Frame Shape"
+          onClear={filters.shapes.length > 0 && (() => onChange({ shapes: [] }))}
+        >
+          <CheckboxGroup
+            name="shape"
+            options={facets.frame_shapes}
+            selected={filters.shapes}
+            onToggle={(value) => onChange({ shapes: toggle(filters.shapes, value) })}
+          />
+        </FilterGroup>
+      )}
+
+      {facets.genders.length > 1 && (
+        <FilterGroup
+          title="Gender"
+          onClear={filters.genders.length > 0 && (() => onChange({ genders: [] }))}
+        >
+          <CheckboxGroup
+            name="gender"
+            options={facets.genders}
+            selected={filters.genders}
+            onToggle={(value) => onChange({ genders: toggle(filters.genders, value) })}
+          />
+        </FilterGroup>
+      )}
+
+      {facets.price && bounds[1] > bounds[0] && (
+        <FilterGroup
+          title="Price"
+          onClear={priceActive && (() => onChange({ minPrice: null, maxPrice: null }))}
+        >
+          <Slider
+            value={price}
+            onChange={(_, value) => setPrice(value)}
+            onChangeCommitted={commitPrice}
+            min={bounds[0]}
+            max={bounds[1]}
+            step={500}
+            valueLabelDisplay="auto"
+            valueLabelFormat={formatINR}
+            getAriaLabel={(index) => (index === 0 ? "Minimum price" : "Maximum price")}
+            getAriaValueText={formatINR}
+            sx={{
+              color: "black",
+              "& .MuiSlider-thumb": {
+                backgroundColor: "white",
+                border: "2px solid black",
+              },
+            }}
+          />
+          <div className="priceRange">
+            <p>
+              Min: <span>{formatINR(price[0])}</span>
+            </p>
+            <p>
+              Max: <span>{formatINR(price[1])}</span>
+            </p>
+          </div>
+        </FilterGroup>
+      )}
     </div>
   );
 };

@@ -8,24 +8,24 @@ import {
   MAX_QUANTITY,
   removeFromCart,
   selectCartLines,
-  selectCartSubtotal,
+  selectCartSubtotalPaise,
   updateQuantity,
 } from "../../Features/Cart/cartSlice";
-import { productImageUrl } from "../../Utils/cloudinary";
-import { formatINR } from "../../Utils/format";
+import { imageUrl } from "../../Utils/cloudinary";
+import { formatPaise } from "../../Utils/format";
 import { storeInfo } from "../../Config/storeInfo";
 
 // Lets the field be cleared while typing; the cart is only updated with a
 // valid number, and an empty field snaps back on blur.
 const QuantityInput = ({ line, className }) => {
   const dispatch = useDispatch();
-  const { product, quantity } = line;
+  const { sku, name, quantity } = line;
   const [text, setText] = useState(String(quantity));
 
   useEffect(() => setText(String(quantity)), [quantity]);
 
   const setQuantity = (value) =>
-    dispatch(updateQuantity({ id: product.id, quantity: value }));
+    dispatch(updateQuantity({ sku, quantity: value }));
 
   return (
     <div className={className}>
@@ -33,7 +33,7 @@ const QuantityInput = ({ line, className }) => {
         type="button"
         onClick={() => setQuantity(quantity - 1)}
         disabled={quantity <= 1}
-        aria-label={`Decrease quantity of ${product.name}`}
+        aria-label={`Decrease quantity of ${name}`}
       >
         -
       </button>
@@ -43,7 +43,7 @@ const QuantityInput = ({ line, className }) => {
         min={1}
         max={MAX_QUANTITY}
         value={text}
-        aria-label={`Quantity of ${product.name}`}
+        aria-label={`Quantity of ${name}`}
         onChange={(event) => {
           setText(event.target.value);
           const value = parseInt(event.target.value, 10);
@@ -55,7 +55,7 @@ const QuantityInput = ({ line, className }) => {
         type="button"
         onClick={() => setQuantity(quantity + 1)}
         disabled={quantity >= MAX_QUANTITY}
-        aria-label={`Increase quantity of ${product.name}`}
+        aria-label={`Increase quantity of ${name}`}
       >
         +
       </button>
@@ -63,14 +63,14 @@ const QuantityInput = ({ line, className }) => {
   );
 };
 
-const RemoveButton = ({ product, size }) => {
+const RemoveButton = ({ line, size }) => {
   const dispatch = useDispatch();
   return (
     <button
       type="button"
       className="cartRemoveBtn"
-      onClick={() => dispatch(removeFromCart(product.id))}
-      aria-label={`Remove ${product.name} from cart`}
+      onClick={() => dispatch(removeFromCart(line.sku))}
+      aria-label={`Remove ${line.name} (${line.colorName}) from cart`}
     >
       <MdOutlineClose size={size} />
     </button>
@@ -105,7 +105,7 @@ const CheckoutNotice = () => (
 
 const ShoppingCart = () => {
   const lines = useSelector(selectCartLines);
-  const subtotal = useSelector(selectCartSubtotal);
+  const subtotal = useSelector(selectCartSubtotalPaise);
   const [showCheckoutNotice, setShowCheckoutNotice] = useState(false);
 
   return (
@@ -136,15 +136,14 @@ const ShoppingCart = () => {
                 </thead>
                 <tbody>
                   {lines.map((line) => {
-                    const { product } = line;
-                    const productUrl = `/products/${product.slug}`;
+                    const productUrl = `/products/${line.slug}?variant=${encodeURIComponent(line.sku)}`;
                     return (
-                      <tr key={product.id}>
+                      <tr key={line.sku}>
                         <td>
                           <div className="shoppingBagTableImg">
                             <Link to={productUrl} tabIndex={-1} aria-hidden="true">
                               <img
-                                src={productImageUrl(product, 0, 240)}
+                                src={imageUrl(line.image, 240) ?? undefined}
                                 alt=""
                                 width={120}
                                 height={120}
@@ -155,14 +154,12 @@ const ShoppingCart = () => {
                         <td>
                           <div className="shoppingBagTableProductDetail">
                             <Link to={productUrl}>
-                              <h4>
-                                {product.brand} {product.name}
-                              </h4>
+                              <h4>{line.name}</h4>
                             </Link>
-                            <p>Colour: {product.color}</p>
+                            <p>Colour: {line.colorName}</p>
                           </div>
                         </td>
-                        <td>{formatINR(product.price)}</td>
+                        <td>{formatPaise(line.pricePaise)}</td>
                         <td>
                           <QuantityInput
                             line={line}
@@ -171,11 +168,11 @@ const ShoppingCart = () => {
                         </td>
                         <td>
                           <p className="cartLineTotal">
-                            {formatINR(line.lineTotal)}
+                            {formatPaise(line.lineTotalPaise)}
                           </p>
                         </td>
                         <td>
-                          <RemoveButton product={product} />
+                          <RemoveButton line={line} />
                         </td>
                       </tr>
                     );
@@ -186,14 +183,13 @@ const ShoppingCart = () => {
               {/* Mobile */}
               <div className="shoppingBagTableMobile">
                 {lines.map((line) => {
-                  const { product } = line;
-                  const productUrl = `/products/${product.slug}`;
+                  const productUrl = `/products/${line.slug}?variant=${encodeURIComponent(line.sku)}`;
                   return (
-                    <div className="shoppingBagTableMobileItems" key={product.id}>
+                    <div className="shoppingBagTableMobileItems" key={line.sku}>
                       <div className="shoppingBagTableMobileItemsImg">
                         <Link to={productUrl} tabIndex={-1} aria-hidden="true">
                           <img
-                            src={productImageUrl(product, 0, 240)}
+                            src={imageUrl(line.image, 240) ?? undefined}
                             alt=""
                             width={120}
                             height={120}
@@ -203,20 +199,18 @@ const ShoppingCart = () => {
                       <div className="shoppingBagTableMobileItemsDetail">
                         <div className="shoppingBagTableMobileItemsDetailMain">
                           <Link to={productUrl}>
-                            <h4>
-                              {product.brand} {product.name}
-                            </h4>
+                            <h4>{line.name}</h4>
                           </Link>
-                          <p>Colour: {product.color}</p>
+                          <p>Colour: {line.colorName}</p>
                           <QuantityInput
                             line={line}
                             className="shoppingBagTableMobileQuantity"
                           />
-                          <span>{formatINR(product.price)}</span>
+                          <span>{formatPaise(line.pricePaise)}</span>
                         </div>
                         <div className="shoppingBagTableMobileItemsDetailTotal">
-                          <RemoveButton product={product} size={20} />
-                          <p>{formatINR(line.lineTotal)}</p>
+                          <RemoveButton line={line} size={20} />
+                          <p>{formatPaise(line.lineTotalPaise)}</p>
                         </div>
                       </div>
                     </div>
@@ -233,7 +227,7 @@ const ShoppingCart = () => {
             <tbody>
               <tr>
                 <th>Subtotal</th>
-                <td>{formatINR(subtotal)}</td>
+                <td>{formatPaise(subtotal)}</td>
               </tr>
               <tr>
                 <th>Shipping</th>
@@ -242,7 +236,7 @@ const ShoppingCart = () => {
               <tr>
                 <th>Total</th>
                 <td>
-                  {formatINR(subtotal)}
+                  {formatPaise(subtotal)}
                   <p className="cartTaxNote">Prices include GST</p>
                 </td>
               </tr>

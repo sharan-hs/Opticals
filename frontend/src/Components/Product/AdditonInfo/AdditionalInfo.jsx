@@ -1,16 +1,26 @@
 import React from "react";
 import "./AdditionalInfo.css";
 
-// Product specifications. Rows without a value are skipped, so new fields
-// can be added to the catalogue without touching this component.
-const AdditionalInfo = ({ product }) => {
+const label = (value) => value && value.replace(/_/g, " ").toLowerCase().replace(/^./, (c) => c.toUpperCase());
+
+const sizeText = (variant) => {
+  const parts = [variant.lens_width_mm, variant.bridge_mm, variant.temple_mm];
+  return parts.every(Boolean) ? `${parts.join("-")} mm (lens-bridge-temple)` : variant.size_label;
+};
+
+// Product specifications. Rows without a value are skipped.
+const AdditionalInfo = ({ product, variant }) => {
   const rows = [
-    ["Brand", product.brand],
-    ["Model", product.model],
-    ["Colour", product.color],
-    ["Category", product.category],
-    ["Product code", product.id.toUpperCase()],
-    ...(product.specs || []).map((spec) => [spec.label, spec.value]),
+    ["Brand", product.brand.name],
+    ["Model", product.model_number],
+    ["Colour", variant.color_name],
+    ["Size", sizeText(variant)],
+    ["Frame shape", label(product.frame_shape)],
+    ["Frame type", label(product.frame_type)],
+    ["Material", label(product.frame_material)],
+    ["Category", product.category.name],
+    ["SKU", variant.sku],
+    ...(product.specifications || []).map((spec) => [spec.label, spec.value]),
   ].filter(([, value]) => value);
 
   return (
@@ -20,9 +30,9 @@ const AdditionalInfo = ({ product }) => {
         <p className="productAdditionalDescription">{product.description}</p>
       )}
       <dl className="productSpecs">
-        {rows.map(([label, value]) => (
-          <div className="productSpecsRow" key={label}>
-            <dt>{label}</dt>
+        {rows.map(([name, value]) => (
+          <div className="productSpecsRow" key={name}>
+            <dt>{name}</dt>
             <dd>{value}</dd>
           </div>
         ))}

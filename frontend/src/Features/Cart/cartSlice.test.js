@@ -6,72 +6,62 @@ import cartReducer, {
   removeFromCart,
   selectCartCount,
   selectCartLines,
-  selectCartSubtotal,
+  selectCartSubtotalPaise,
   updateQuantity,
 } from "./cartSlice";
-import { getProductById } from "../../Data/catalog";
 
 const makeStore = () => configureStore({ reducer: { cart: cartReducer } });
 
+const HAVANA = {
+  sku: "ORB4349-HAVANA",
+  slug: "ray-ban-rb4349",
+  name: "Ray-Ban RB4349",
+  colorName: "Havana",
+  pricePaise: 719000,
+  image: { public_id: "Products/orb4349_havana/orb4349_havana_1", version: 1775294749 },
+};
+const BLACK = { ...HAVANA, sku: "ORB2132", slug: "ray-ban-new-wayfarer-rb2132", pricePaise: 1249000 };
+
 describe("cart slice", () => {
-  test("adds a product with the requested quantity", () => {
+  test("adds a colour with the requested quantity", () => {
     const store = makeStore();
-    store.dispatch(addToCart({ id: "orb2132", quantity: 3 }));
-    expect(store.getState().cart.items).toEqual([{ id: "orb2132", quantity: 3 }]);
+    store.dispatch(addToCart({ ...HAVANA, quantity: 3 }));
+    expect(store.getState().cart.items).toEqual([{ ...HAVANA, quantity: 3 }]);
   });
 
-  test("adding the same product again merges quantities", () => {
+  test("adding the same colour again merges quantities and refreshes the snapshot", () => {
     const store = makeStore();
-    store.dispatch(addToCart({ id: "orb2132" }));
-    store.dispatch(addToCart({ id: "orb2132", quantity: 2 }));
-    expect(store.getState().cart.items).toEqual([{ id: "orb2132", quantity: 3 }]);
+    store.dispatch(addToCart(HAVANA));
+    store.dispatch(addToCart({ ...HAVANA, pricePaise: 699000, quantity: 2 }));
+    expect(store.getState().cart.items).toEqual([{ ...HAVANA, pricePaise: 699000, quantity: 3 }]);
   });
 
   test("caps quantity at the per-item limit", () => {
     const store = makeStore();
-    store.dispatch(addToCart({ id: "orb2132", quantity: MAX_QUANTITY + 5 }));
-    store.dispatch(addToCart({ id: "orb2132", quantity: 1 }));
+    store.dispatch(addToCart({ ...HAVANA, quantity: 25 }));
     expect(store.getState().cart.items[0].quantity).toBe(MAX_QUANTITY);
   });
 
-  test("updateQuantity clamps to 1..MAX and ignores non-numbers", () => {
+  test("updates, ignores invalid quantities and removes", () => {
     const store = makeStore();
-    store.dispatch(addToCart({ id: "orb2132", quantity: 2 }));
-    store.dispatch(updateQuantity({ id: "orb2132", quantity: 99 }));
-    expect(store.getState().cart.items[0].quantity).toBe(MAX_QUANTITY);
-    store.dispatch(updateQuantity({ id: "orb2132", quantity: 0 }));
+    store.dispatch(addToCart(HAVANA));
+    store.dispatch(updateQuantity({ sku: HAVANA.sku, quantity: 4 }));
+    store.dispatch(updateQuantity({ sku: HAVANA.sku, quantity: NaN }));
+    store.dispatch(updateQuantity({ sku: HAVANA.sku, quantity: 0 }));
     expect(store.getState().cart.items[0].quantity).toBe(1);
-    store.dispatch(updateQuantity({ id: "orb2132", quantity: NaN }));
-    expect(store.getState().cart.items[0].quantity).toBe(1);
-  });
-
-  test("removes and clears items", () => {
-    const store = makeStore();
-    store.dispatch(addToCart({ id: "orb2132" }));
-    store.dispatch(addToCart({ id: "orb3447" }));
-    store.dispatch(removeFromCart("orb2132"));
-    expect(store.getState().cart.items.map((i) => i.id)).toEqual(["orb3447"]);
-    store.dispatch(clearCart());
+    store.dispatch(removeFromCart(HAVANA.sku));
     expect(store.getState().cart.items).toEqual([]);
   });
 
-  test("selectors price lines from the catalogue", () => {
+  test("totals are computed in paise", () => {
     const store = makeStore();
-    store.dispatch(addToCart({ id: "orb2132", quantity: 2 }));
-    store.dispatch(addToCart({ id: "orb4349_brown", quantity: 1 }));
+    store.dispatch(addToCart({ ...HAVANA, quantity: 2 }));
+    store.dispatch(addToCart(BLACK));
     const state = store.getState();
-    const expected =
-      getProductById("orb2132").price * 2 + getProductById("orb4349_brown").price;
-
-    expect(selectCartLines(state)).toHaveLength(2);
     expect(selectCartCount(state)).toBe(3);
-    expect(selectCartSubtotal(state)).toBe(expected);
-    expect(Number.isFinite(selectCartSubtotal(state))).toBe(true);
-  });
-
-  test("lines for products no longer in the catalogue are ignored", () => {
-    const state = { cart: { items: [{ id: "discontinued", quantity: 1 }] } };
-    expect(selectCartLines(state)).toEqual([]);
-    expect(selectCartSubtotal(state)).toBe(0);
+    expect(selectCartSubtotalPaise(state)).toBe(2 * 719000 + 1249000);
+    expect(selectCartLines(state)[0].lineTotalPaise).toBe(1438000);
+    store.dispatch(clearCart());
+    expect(selectCartCount(store.getState())).toBe(0);
   });
 });

@@ -26,10 +26,6 @@
   z-index: 2;
 }
 
-.productCardImgBack {
-  z-index: 1;
-  opacity: 0;
-}
 
 .productCardAdd {
   position: absolute;
@@ -50,14 +46,6 @@
 
 /* Devices with a mouse: back image and "Add to Cart" bar on hover/focus. */
 @media (hover: hover) {
-  .productCard:hover .productCardImgBack {
-    opacity: 1;
-  }
-
-  .productCard:hover .productCardImgFront {
-    opacity: 0;
-  }
-
   .productCardAdd {
     left: 10px;
     right: 10px;
@@ -135,5 +123,94 @@
   .productCardPrice,
   .productCardCategory {
     font-size: 15px;
+  }
+}
+
+.productCardAdd {
+  text-decoration: none;
+}
+
+.productCardAddDisabled {
+  cursor: default;
+  color: #767676;
+}
+
+.productCardBadge {
+  position: absolute;
+  z-index: 3;
+  top: 10px;
+  left: 10px;
+  padding: 3px 10px;
+  font-size: 13px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  background-color: white;
+  color: #8d1c1c;
+}
+
+.productCardBadge.low {
+  color: #8a5a00;
+}
+
+.productCardColours {
+  color: #555;
+}
+
+.productCardFrom {
+  font-weight: 400;
+  color: #555;
+}
+
+.productCardMrp {
+  color: #767676;
+  font-weight: 400;
+}
+
+.productCardDiscount {
+  color: #1d7a3a;
+  font-weight: 500;
+}
+
+.productCardSkeleton .productCardMedia,
+.skeletonLine {
+  background: linear-gradient(90deg, #eff0f1 25%, #f7f7f8 50%, #eff0f1 75%);
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.2s infinite;
+}
+
+.skeletonLine {
+  height: 14px;
+}
+
+.skeletonLine.short {
+  width: 50%;
+}
+
+@keyframes skeletonShimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .productCardSkeleton .productCardMedia,
+  .skeletonLine {
+    animation: none;
+  }
+}
+
+.imagePlaceholder {
+  width: 100%;
+  background-color: #eff0f1;
+}
+
+/* Touch: the "Out of stock" badge says it all; no empty round button. */
+@media (hover: none) {
+  .productCardAddDisabled {
+    display: none;
   }
 }

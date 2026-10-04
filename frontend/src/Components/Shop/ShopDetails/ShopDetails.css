@@ -359,3 +359,9 @@
     gap: 14px;
   }
 }
+
+/* New results are loading; keep the old ones visible but dimmed. */
+.shopDetailsProductsContainer.isRefreshing {
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}

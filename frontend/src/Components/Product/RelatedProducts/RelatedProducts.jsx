@@ -8,10 +8,10 @@ import { Navigation } from "swiper/modules";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 
 import ProductCard from "../../ProductCard/ProductCard";
-import { getRelatedProducts } from "../../../Data/catalog";
+import { useGetRelatedProductsQuery } from "../../../Features/Catalog/catalogApi";
 
-const RelatedProducts = ({ product }) => {
-  const relatedProducts = getRelatedProducts(product);
+const RelatedProducts = ({ slug }) => {
+  const { data: relatedProducts = [] } = useGetRelatedProductsQuery({ slug });
   if (!relatedProducts.length) return null;
 
   return (

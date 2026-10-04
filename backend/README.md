@@ -76,6 +76,8 @@ Conventions:
 | `POST /api/v1/auth/forgot-password`, `/reset-password` | Emailed single-use link (30 min) |
 | `GET/PATCH /api/v1/me` | Profile |
 | `/api/v1/me/addresses` | List, add, edit, delete, `/{id}/default` |
+| `GET /api/v1/products` (+ `/facets`, `/{slug}`, `/{slug}/related`), `/categories`, `/brands` | Public catalogue: filters, search, sort, availability buckets |
+| `/api/v1/admin/...` | Products, colours, photos, categories, brands, stock, stock history (ADMIN only) |
 
 Auth model: a 15-minute JWT access token sent as `Authorization: Bearer …` (kept in memory
 by the frontend) and a 30-day refresh token in an httpOnly cookie scoped to `/api/v1/auth`,
