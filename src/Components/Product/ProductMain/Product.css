@@ -19,9 +19,23 @@
   gap: 10px;
 }
 
+.productThumb button {
+  flex-shrink: 0;
+  padding: 0;
+  border: 2px solid transparent;
+  background: none;
+  cursor: pointer;
+}
+
+.productThumb button[aria-current="true"] {
+  border-color: black;
+}
+
 .productThumb img {
+  display: block;
   width: 80px;
   height: 80px;
+  object-fit: contain;
 }
 
 .productFullImg {
@@ -29,10 +43,12 @@
 }
 
 .productFullImg img {
+  display: block;
   width: 520px;
   height: 520px;
+  object-fit: contain;
   pointer-events: none;
-  background-color: #767676;
+  background-color: #eff0f1;
 }
 
 .buttonsGroup {
@@ -46,6 +62,7 @@
 }
 
 .directionBtn {
+  cursor: pointer;
   background-color: white;
   border: none;
   display: flex;
@@ -78,6 +95,12 @@
 .breadcrumbLink {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
+  font-size: 16px;
+}
+
+.breadcrumbLink span[aria-current] {
+  color: #767676;
 }
 
 .breadcrumbLink a {
@@ -85,7 +108,7 @@
   color: black;
   text-transform: uppercase;
   font-weight: 500;
-  font-size: 14px;
+  font-size: 16px;
   position: relative;
 }
 
@@ -103,66 +126,37 @@
   width: 50%;
 }
 
-.prevNextLink {
-  display: flex;
-  align-items: center;
-  gap: 25px;
-}
-
-.prevNextLink a {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  text-decoration: none;
-  color: black;
+.productBrand {
+  font-size: 16px;
+  color: #767676;
   text-transform: uppercase;
-  font-weight: 500;
-  font-size: 14px;
-  position: relative;
-}
-
-.prevNextLink a::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  bottom: -5px;
-  width: 0;
-  border-bottom: 2px solid black;
-  transition: width 0.3s ease;
-}
-
-.prevNextLink a:hover::after {
-  width: 50%;
+  margin-bottom: 6px;
 }
 
 .productName h1 {
   font-size: 28px;
   font-weight: 500;
   color: black;
-  line-height: 35px;
+  line-height: 1.25;
 }
 
-.productRating {
-  display: flex;
-  gap: 5px;
-  align-items: center;
-}
-
-.productRating p {
-  font-size: 14px;
-  color: #5f5e5e;
-  margin-left: 10px;
-}
-
-.productPrice h3 {
-  font-size: 22px;
-  font-weight: 600;
+.productPrice {
   margin-bottom: 20px;
 }
 
-.productDescription p {
+.productPrice h3 {
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.productPrice p {
   font-size: 15px;
-  line-height: 25px;
+  color: #767676;
+}
+
+.productDescription p {
+  font-size: 17px;
+  line-height: 1.65;
   margin-bottom: 20px;
 }
 
@@ -171,33 +165,6 @@
   flex-direction: column;
   gap: 30px;
   margin-bottom: 20px;
-}
-
-.productSize {
-  display: flex;
-  gap: 20px;
-  align-items: center;
-}
-
-.productSize p {
-  font-size: 14px;
-  color: black;
-  font-weight: 500;
-  text-transform: uppercase;
-}
-
-.sizeBtn {
-  display: flex;
-  gap: 10px;
-}
-
-.sizeBtn button {
-  background-color: white;
-  border: 1px solid;
-  padding: 5px 15px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  outline: none;
 }
 
 .productColor {
@@ -211,17 +178,16 @@
   gap: 15px;
 }
 
-.colorBtn button {
-  background-color: white;
+.colorBtn a {
+  display: block;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
-  padding: 8px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  outline: none;
+  border: 1px solid #ccc;
   position: relative;
 }
 
-.colorBtn button.highlighted::after {
+.colorBtn a.highlighted::after {
   content: "";
   position: absolute;
   box-sizing: border-box;
@@ -234,14 +200,21 @@
 }
 
 .productColor p {
-  font-size: 14px;
+  font-size: 16px;
   color: black;
   font-weight: 500;
   text-transform: uppercase;
 }
 
+.productColor p span {
+  font-weight: 400;
+  text-transform: none;
+}
+
 .productCartQuantity {
   display: flex;
+  width: 100%;
+  max-width: 480px;
   gap: 20px;
   align-items: center;
   margin-bottom: 20px;
@@ -261,16 +234,34 @@
   cursor: pointer;
 }
 
+.productQuantity button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 .productQuantity input {
   width: 40px;
   height: 57px;
   text-align: center;
   border: none;
-  outline: none;
+  font-family: inherit;
+  -moz-appearance: textfield;
+}
+
+.productQuantity input::-webkit-outer-spin-button,
+.productQuantity input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Fills the row next to the quantity stepper instead of a fixed width. */
+.productCartBtn {
+  flex: 1;
 }
 
 .productCartBtn button {
-  padding: 20px 110px;
+  width: 100%;
+  padding: 20px 24px;
   background-color: black;
   color: white;
   font-weight: 600;
@@ -280,65 +271,6 @@
   white-space: nowrap;
 }
 
-.productWishShare {
-  display: flex;
-  gap: 30px;
-  margin-bottom: 25px;
-}
-
-.productWishList button {
-  display: flex;
-  align-items: center;
-  background-color: white;
-  border: none;
-  gap: 10px;
-  outline: none;
-  position: relative;
-}
-
-.productWishList button::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  bottom: -10px;
-  width: 0;
-  border-bottom: 2px solid black;
-  transition: width 0.3s ease;
-}
-
-.productWishList button:hover::after {
-  width: 50%;
-}
-
-.productWishList button p {
-  text-transform: uppercase;
-  font-weight: 500;
-}
-
-.productShare {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  text-transform: uppercase;
-  font-size: 13px;
-  font-weight: 500;
-  position: relative;
-}
-
-.productShare::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  bottom: -10px;
-  width: 0;
-  border-bottom: 2px solid black;
-  transition: width 0.3s ease;
-}
-
-.productShare:hover::after {
-  width: 50%;
-}
-
 .productTags {
   display: flex;
   flex-direction: column;
@@ -346,21 +278,18 @@
 }
 
 .productTags p {
-  font-size: 13px;
+  font-size: 15px;
   color: black;
 }
 
 .productTags span {
-  font-size: 13px;
+  font-size: 15px;
   color: #767676;
 }
 
 /* Responsive CSS */
 
 @media screen and (max-width: 1250px) {
-  .productCartBtn button {
-    padding: 20px 40px;
-  }
   .productFullImg img {
     width: 450px;
     height: 450px;
@@ -383,10 +312,6 @@
     height: 420px;
     pointer-events: none;
   }
-
-  .productCartBtn button {
-    padding: 20px 80px;
-  }
 }
 
 @media screen and (max-width: 991px) {
@@ -401,6 +326,7 @@
 
   .productThumb {
     flex-direction: row;
+    overflow-x: auto;
   }
 
   .buttonsGroup {
@@ -411,6 +337,7 @@
   .productFullImg img {
     width: 100%;
     height: auto;
+    aspect-ratio: 1 / 1;
   }
 
   .productDetails {
@@ -445,23 +372,11 @@
   .directionBtn {
     padding: 10px;
   }
-
-  .productCartBtn button {
-    padding: 20px 50px;
-  }
 }
 
 @media screen and (max-width: 320px) {
   .productThumb img {
     width: 65px;
     height: 65px;
-  }
-
-  .productCartBtn button {
-    padding: 20px 30px;
-  }
-
-  .sizeBtn button {
-    padding: 5px 12px;
   }
 }

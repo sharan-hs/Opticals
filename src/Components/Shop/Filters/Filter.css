@@ -10,15 +10,30 @@
 }
 
 .filterHeading {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 600;
   text-transform: uppercase;
 }
 
-.filterCategories p {
-  font-size: 14px;
-  padding-bottom: 10px;
+.filterOptionList {
+  list-style: none;
+}
+
+.filterOption {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0 0 10px;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: 16px;
+  text-align: left;
   cursor: pointer;
+}
+
+.filterOption[aria-pressed="true"] {
+  font-weight: 700;
 }
 
 /* =========================
@@ -32,6 +47,8 @@
 }
 
 .colorPill {
+  font-family: inherit;
+  color: inherit;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -40,7 +57,7 @@
   border-radius: 20px;
   cursor: pointer;
   transition: all 0.25s ease;
-  font-size: 13px;
+  font-size: 15px;
   background: #fff;
 }
 
@@ -66,91 +83,8 @@
 }
 
 /* =========================
-   OLD COLOR GRID (kept safe fallback)
-========================= */
-
-.filterColorBtn {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 15px;
-}
-
-.filterColorBtn button {
-  background-color: white;
-  border-radius: 50%;
-  padding: 8px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  outline: none;
-  border: none;
-  position: relative;
-  height: 20px;
-  width: 20px;
-}
-
-.filterColorBtn button.selected::after {
-  content: "";
-  position: absolute;
-  box-sizing: border-box;
-  border: 2px solid black;
-  border-radius: 50%;
-  width: calc(100% + 12px);
-  height: calc(100% + 12px);
-  left: -6px;
-  top: -6px;
-}
-
-/* =========================
-   SIZE (unchanged)
-========================= */
-
-.sizeButtons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 15px;
-}
-
-.sizeButton {
-  background-color: white;
-  padding: 6px 20px;
-  cursor: pointer;
-  border: 1px solid #e4e4e4;
-  font-size: 14px;
-}
-
-.sizeButton:hover {
-  background-color: #e4e4e4;
-}
-
-.sizeButton.selected {
-  background-color: #e4e4e4;
-}
-
-/* =========================
    BRANDS
 ========================= */
-
-.searchBar {
-  position: relative;
-  display: flex;
-  align-items: center;
-  margin-bottom: 25px;
-}
-
-.searchIcon {
-  position: absolute;
-  right: 10px;
-}
-
-.searchBar input {
-  width: calc(100% - 30px);
-  padding: 12px 18px 9.6px;
-  padding-right: 30px;
-  border: 2px solid #e4e4e4;
-  outline: none;
-  font-size: 14px;
-  text-transform: uppercase;
-}
 
 .brandList {
   margin-top: 10px;
@@ -192,20 +126,14 @@
   transform: translate(-50%, -50%) scale(1);
 }
 
-.notFoundMessage {
-  font-size: 14px;
-  color: red;
-  margin-top: 10px;
-}
-
 .brandLabel {
   cursor: pointer;
-  font-size: 14px;
+  font-size: 16px;
 }
 
 .brandCount {
   margin-left: auto;
-  font-size: 14px;
+  font-size: 16px;
   color: #767676;
 }
 
@@ -219,7 +147,7 @@
 }
 
 .priceRange p {
-  font-size: 14px;
+  font-size: 16px;
   color: #767676;
 }
 
@@ -237,7 +165,7 @@
 }
 
 .clearAllBtn {
-  font-size: 12px;
+  font-size: 15px;
   padding: 6px 10px;
   border: 1px solid #000;
   background: transparent;
@@ -250,15 +178,13 @@
   color: #fff;
 }
 
-.filterHeaderRow {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-}
-
 .clearBtn {
-  font-size: 12px;
+  margin-top: 12px;
+  padding: 0;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: 13px;
   color: #767676;
   cursor: pointer;
 }

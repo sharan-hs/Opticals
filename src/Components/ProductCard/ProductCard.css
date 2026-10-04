@@ -1,0 +1,139 @@
+.productCard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.productCardMedia {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  background-color: #eff0f1;
+}
+
+.productCardMedia img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transition: opacity 0.3s linear;
+}
+
+.productCardImgFront {
+  z-index: 2;
+}
+
+.productCardImgBack {
+  z-index: 1;
+  opacity: 0;
+}
+
+.productCardAdd {
+  position: absolute;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
+  cursor: pointer;
+  color: black;
+  background-color: rgb(253, 253, 253);
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+/* Devices with a mouse: back image and "Add to Cart" bar on hover/focus. */
+@media (hover: hover) {
+  .productCard:hover .productCardImgBack {
+    opacity: 1;
+  }
+
+  .productCard:hover .productCardImgFront {
+    opacity: 0;
+  }
+
+  .productCardAdd {
+    left: 10px;
+    right: 10px;
+    bottom: -60px;
+    padding: 12px;
+    transition: bottom 0.2s ease;
+  }
+
+  .productCardAdd svg {
+    display: none;
+  }
+
+  .productCard:hover .productCardAdd,
+  .productCardAdd:focus-visible {
+    bottom: 10px;
+  }
+}
+
+/* Touch devices: always-visible round cart button. */
+@media (hover: none) {
+  .productCardAdd {
+    top: 8px;
+    right: 8px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    color: #555;
+  }
+
+  .productCardAdd span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+}
+
+.productCardInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.productCardCategory {
+  color: #767676;
+  font-size: 16px;
+}
+
+.productCardName {
+  font-size: 18px;
+  font-weight: 400;
+}
+
+.productCardName a {
+  color: black;
+  text-decoration: none;
+}
+
+.productCardName a:hover {
+  text-decoration: underline;
+}
+
+.productCardPrice {
+  font-size: 17px;
+  font-weight: 500;
+}
+
+@media screen and (max-width: 450px) {
+  .productCardName {
+    font-size: 16px;
+  }
+
+  .productCardPrice,
+  .productCardCategory {
+    font-size: 15px;
+  }
+}

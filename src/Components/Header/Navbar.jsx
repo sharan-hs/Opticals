@@ -1,209 +1,206 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "./Navbar.css";
 
 import { useSelector } from "react-redux";
-import logo2 from "../../Assets/logo2.png";
-import logo3 from "../../Assets/logo3.png";
-import { Link } from "react-router-dom";
-import logo from "../../Assets/header-logo.png";
-import { RiMenu2Line } from "react-icons/ri";
+import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
+import Badge from "@mui/material/Badge";
+import { RiMenu2Line, RiShoppingBagLine } from "react-icons/ri";
 import { FiSearch } from "react-icons/fi";
 import { FaRegUser } from "react-icons/fa6";
-import { RiShoppingBagLine } from "react-icons/ri";
 import { MdOutlineClose } from "react-icons/md";
-import { FiHeart } from "react-icons/fi";
-import { FaFacebookF } from "react-icons/fa";
-import { FaXTwitter } from "react-icons/fa6";
-import { FaInstagram } from "react-icons/fa";
-import { FaYoutube } from "react-icons/fa";
-import { FaPinterest } from "react-icons/fa";
 
-import Badge from "@mui/material/Badge";
+import logo2 from "../../Assets/logo2.png";
+import { selectCartCount } from "../../Features/Cart/cartSlice";
+
+const NAV_LINKS = [
+  { to: "/", label: "Home" },
+  { to: "/shop", label: "Shop" },
+  { to: "/about", label: "About" },
+  { to: "/contact", label: "Contact" },
+];
+
+const SearchForm = ({ id, className, onSearch, inputRef }) => {
+  const [query, setQuery] = useState("");
+  return (
+    <form
+      role="search"
+      className={className}
+      onSubmit={(event) => {
+        event.preventDefault();
+        onSearch(query.trim());
+        setQuery("");
+      }}
+    >
+      <label htmlFor={id} className="visuallyHidden">
+        Search products
+      </label>
+      <input
+        id={id}
+        ref={inputRef}
+        type="search"
+        placeholder="Search products"
+        value={query}
+        onChange={(event) => setQuery(event.target.value)}
+      />
+      <button type="submit" aria-label="Search">
+        <FiSearch size={20} />
+      </button>
+    </form>
+  );
+};
+
+const CartLink = ({ count, iconColor }) => (
+  <Link to="/cart" aria-label={`Cart, ${count} ${count === 1 ? "item" : "items"}`}>
+    <Badge
+      badgeContent={count}
+      showZero
+      color="primary"
+      anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+    >
+      <RiShoppingBagLine size={22} color={iconColor} />
+    </Badge>
+  </Link>
+);
 
 const Navbar = () => {
-  const cart = useSelector((state) => state.cart);
-
+  const cartCount = useSelector(selectCartCount);
+  const location = useLocation();
+  const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const desktopSearchRef = useRef(null);
 
-  const toggleMobileMenu = () => {
-    setMobileMenuOpen(!mobileMenuOpen);
-    document.body.style.overflow = mobileMenuOpen ? "auto" : "hidden";
-  };
+  // Close menus whenever the page changes, however the navigation happened.
+  useEffect(() => {
+    setMobileMenuOpen(false);
+    setSearchOpen(false);
+  }, [location.pathname, location.search]);
 
-  const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
-  };
+  // Lock page scroll only while the mobile menu is open.
+  useEffect(() => {
+    if (!mobileMenuOpen) return undefined;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [mobileMenuOpen]);
+
+  useEffect(() => {
+    if (searchOpen) desktopSearchRef.current?.focus();
+  }, [searchOpen]);
+
+  const search = (query) =>
+    navigate(query ? `/shop?q=${encodeURIComponent(query)}` : "/shop");
 
   return (
-    <>
-      {/* Desktop Menu */}
-      <nav className="navBar">
+    <header className="siteHeader">
+      {/* Desktop */}
+      <nav className="navBar" aria-label="Main">
         <div className="logoLinkContainer">
           <div className="logoContainer">
-            <Link to="/" onClick={scrollToTop}>
-              <img height={40} src={logo2} alt="Logo" />
+            <Link to="/">
+              <img width={143} height={50} src={logo2} alt="Vijai Opticians home" />
             </Link>
           </div>
           <div className="linkContainer">
             <ul>
-              <li>
-                <Link to="/" onClick={scrollToTop}>
-                  HOME
-                </Link>
-              </li>
-              <li>
-                <Link to="/shop" onClick={scrollToTop}>
-                  SHOP
-                </Link>
-              </li>
-              {/* <li>
-                <Link to="/blog" onClick={scrollToTop}>
-                  BLOG
-                </Link>
-              </li> */}
-              <li>
-                <Link to="/about" onClick={scrollToTop}>
-                  ABOUT
-                </Link>
-              </li>
-              <li>
-                <Link to="/contact" onClick={scrollToTop}>
-                  CONTACT
-                </Link>
-              </li>
+              {NAV_LINKS.map((link) => (
+                <li key={link.to}>
+                  <NavLink to={link.to} end={link.to === "/"}>
+                    {link.label.toUpperCase()}
+                  </NavLink>
+                </li>
+              ))}
             </ul>
           </div>
         </div>
         <div className="iconContainer">
-          <FiSearch size={22} onClick={scrollToTop} />
-          <Link to="/loginSignUp" onClick={scrollToTop}>
+          {searchOpen && (
+            <SearchForm
+              id="desktop-search"
+              className="headerSearch"
+              onSearch={search}
+              inputRef={desktopSearchRef}
+            />
+          )}
+          <button
+            type="button"
+            className="iconButton"
+            onClick={() => setSearchOpen((open) => !open)}
+            aria-label={searchOpen ? "Close search" : "Open search"}
+            aria-expanded={searchOpen}
+          >
+            {searchOpen ? <MdOutlineClose size={22} /> : <FiSearch size={22} />}
+          </button>
+          <Link to="/loginSignUp" aria-label="My account">
             <FaRegUser size={22} />
           </Link>
-          <Link to="/cart" onClick={scrollToTop}>
-            <Badge
-              badgeContent={cart.items.length === 0 ? "0" : cart.items.length}
-              color="primary"
-              anchorOrigin={{
-                vertical: "bottom",
-                horizontal: "right",
-              }}
-            >
-              <RiShoppingBagLine size={22} />
-            </Badge>
-          </Link>
-          <FiHeart size={22} onClick={scrollToTop} />
-          {/* <RiMenu2Line size={22} /> */}
+          <CartLink count={cartCount} />
         </div>
       </nav>
 
-      {/* Mobile Menu */}
-      <nav>
+      {/* Mobile */}
+      <div className="mobileHeader">
         <div className="mobile-nav">
-          {mobileMenuOpen ? (
-            <MdOutlineClose size={22} onClick={toggleMobileMenu} />
-          ) : (
-            <RiMenu2Line size={22} onClick={toggleMobileMenu} />
-          )}
+          <button
+            type="button"
+            className="iconButton"
+            onClick={() => setMobileMenuOpen((open) => !open)}
+            aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={mobileMenuOpen}
+            aria-controls="mobile-menu"
+          >
+            {mobileMenuOpen ? (
+              <MdOutlineClose size={22} />
+            ) : (
+              <RiMenu2Line size={22} />
+            )}
+          </button>
           <div className="logoContainer">
             <Link to="/">
-              <img height={60} src={logo2} alt="Logo" />
+              <img width={172} height={60} src={logo2} alt="Vijai Opticians home" />
             </Link>
           </div>
-          <Link to="/cart">
-            <Badge
-              badgeContent={cart.items.length === 0 ? "0" : cart.items.length}
-              color="primary"
-              anchorOrigin={{
-                vertical: "bottom",
-                horizontal: "right",
-              }}
-            >
-              <RiShoppingBagLine size={22} color="black" />
-            </Badge>
-          </Link>
+          <CartLink count={cartCount} iconColor="black" />
         </div>
-        <div className={`mobile-menu ${mobileMenuOpen ? "open" : ""}`}>
+
+        <nav
+          id="mobile-menu"
+          className={`mobile-menu ${mobileMenuOpen ? "open" : ""}`}
+          aria-label="Mobile"
+        >
           <div className="mobile-menuTop">
             <div className="mobile-menuSearchBar">
-              <div className="mobile-menuSearchBarContainer">
-                <input type="text" placeholder="Search products" />
-                <Link to="/shop">
-                  <FiSearch size={22} onClick={toggleMobileMenu} />
-                </Link>
-              </div>
+              <SearchForm
+                id="mobile-search"
+                className="mobile-menuSearchBarContainer"
+                onSearch={search}
+              />
             </div>
             <div className="mobile-menuList">
               <ul>
-                <li>
-                  <Link to="/" onClick={toggleMobileMenu}>
-                    HOME
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/shop" onClick={toggleMobileMenu}>
-                    SHOP
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/blog" onClick={toggleMobileMenu}>
-                    BLOG
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/about" onClick={toggleMobileMenu}>
-                    ABOUT
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/contact" onClick={toggleMobileMenu}>
-                    CONTACT
-                  </Link>
-                </li>
+                {NAV_LINKS.map((link) => (
+                  <li key={link.to}>
+                    <NavLink to={link.to} end={link.to === "/"}>
+                      {link.label.toUpperCase()}
+                    </NavLink>
+                  </li>
+                ))}
               </ul>
             </div>
           </div>
 
           <div className="mobile-menuFooter">
             <div className="mobile-menuFooterLogin">
-              <Link to="/loginSignUp" onClick={toggleMobileMenu}>
-                <FaRegUser />
+              <Link to="/loginSignUp">
+                <FaRegUser aria-hidden="true" />
                 <p>My Account</p>
               </Link>
             </div>
-            <div className="mobile-menuFooterLangCurrency">
-              <div className="mobile-menuFooterLang">
-                <p>Language</p>
-                <select name="language" id="language">
-                  <option value="english">United States | English</option>
-                  <option value="Hindi">Hindi</option>
-                  <option value="Germany">Germany</option>
-                  <option value="French">French</option>
-                </select>
-              </div>
-              <div className="mobile-menuFooterCurrency">
-                <p>Currency</p>
-                <select name="currency" id="currency">
-                  <option value="USD">$ USD</option>
-                  <option value="INR">₹ INR</option>
-                  <option value="EUR">€ EUR</option>
-                  <option value="GBP">£ GBP</option>
-                </select>
-              </div>
-            </div>
-            <div className="mobile-menuSocial_links">
-              <FaFacebookF />
-              <FaXTwitter />
-              <FaInstagram />
-              <FaYoutube />
-              <FaPinterest />
-            </div>
           </div>
-        </div>
-      </nav>
-    </>
+        </nav>
+      </div>
+    </header>
   );
 };
 

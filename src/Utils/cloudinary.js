@@ -1,14 +1,32 @@
-const CLOUD_NAME = "dyf8dp9oo";
+// Cloud names are public; the env var allows a separate staging account.
+const CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || "dyf8dp9oo";
+const BASE_URL = `https://res.cloudinary.com/${CLOUD_NAME}/image/upload`;
 
-export const getProductImages = (productID, count = 6) => {
-  const versionMap = {
-    orb4349_havana: "v1775294749",
-    // add others ONLY if needed
-  };
+// Builds a delivery URL. f_auto/q_auto let Cloudinary pick WebP/AVIF and a
+// sensible quality; passing `width` resizes on the CDN.
+export const cloudinaryUrl = (publicId, { width, version } = {}) => {
+  const transformations = ["f_auto", "q_auto"];
+  if (width) transformations.push("c_fit", `w_${width}`);
 
-  const version = versionMap[productID] || "";
-
-  return Array.from({ length: count }, (_, i) => {
-    return `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/${version}/Products/${productID}/${productID}_${i + 1}.png`;
-  });
+  return [BASE_URL, transformations.join(","), version && `v${version}`, publicId]
+    .filter(Boolean)
+    .join("/");
 };
+
+export const cloudinarySrcSet = (publicId, widths, { version } = {}) =>
+  widths
+    .map((width) => `${cloudinaryUrl(publicId, { width, version })} ${width}w`)
+    .join(", ");
+
+// Public IDs of a catalogue product's images, in display order.
+export const productImageIds = (product) =>
+  Array.from(
+    { length: product.imageCount },
+    (_, i) => `Products/${product.id}/${product.id}_${i + 1}.png`
+  );
+
+export const productImageUrl = (product, index = 0, width) =>
+  cloudinaryUrl(productImageIds(product)[index], {
+    width,
+    version: product.imageVersion,
+  });

@@ -54,13 +54,13 @@
 }
 
 .shoppingCartTabsNumber h3 {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 500;
   text-transform: uppercase;
 }
 
 .shoppingCartTabsNumber p {
-  font-size: 14px;
+  font-size: 16px;
   color: #767676;
 }
 
@@ -114,7 +114,7 @@
 
 .shoppingBagTable th {
   text-align: left;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 500;
   padding: 10px 0;
   border-bottom: 1px solid #e4e4e4;
@@ -146,7 +146,7 @@
 }
 
 .shoppingBagTableProductDetail h4 {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 400;
 }
 
@@ -156,7 +156,7 @@
 }
 
 .shoppingBagTableProductDetail p {
-  font-size: 14px;
+  font-size: 16px;
   color: #767676;
 }
 
@@ -166,14 +166,14 @@
   align-items: center;
   border: 2px solid #e0e0e0;
   padding: 0 10px;
-  width: 70px;
+  width: fit-content;
 }
 
 .ShoppingBagTableQuantity button {
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 18px;
 }
 
 .ShoppingBagTableQuantity input {
@@ -191,7 +191,7 @@
   justify-content: center;
   gap: 20px;
   font-weight: 500;
-  font-size: 18px;
+  font-size: 20px;
   padding: 20px 10px;
   text-transform: uppercase;
 }
@@ -224,7 +224,7 @@
 }
 
 .shoppingBagTotal h3 {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 600;
   text-transform: uppercase;
   margin-left: 7px;
@@ -242,7 +242,7 @@
 .shoppingBagTotalTable th {
   text-align: left;
   vertical-align: baseline;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 500;
   border-bottom: 1px solid #e4e4e4;
   text-transform: uppercase;
@@ -251,7 +251,7 @@
 
 .shoppingBagTotalTable td {
   padding: 20px 0;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 500;
 }
 
@@ -306,7 +306,7 @@
   padding: 0 20px;
   border: none;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 600;
   text-transform: uppercase;
 }
@@ -317,13 +317,86 @@
   padding: 0 20px;
   border: none;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 600;
   text-transform: uppercase;
 }
 
 .shoppingBagTableMobile {
   display: none;
+}
+
+.cartRemoveBtn {
+  display: flex;
+  padding: 4px;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.cartLineTotal {
+  font-weight: 500;
+}
+
+.cartTaxNote {
+  margin-top: 4px;
+  font-size: 14px;
+  font-weight: 400;
+  color: #767676;
+}
+
+.cartShopNow {
+  background-color: #000;
+  color: #fff;
+  padding: 10px 20px;
+  text-decoration: none;
+  text-transform: uppercase;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.ShoppingBagTableQuantity button:disabled,
+.shoppingBagTableMobileQuantity button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.ShoppingBagTableQuantity input,
+.shoppingBagTableMobileQuantity input {
+  font-family: inherit;
+  -moz-appearance: textfield;
+}
+
+.ShoppingBagTableQuantity input::-webkit-inner-spin-button,
+.ShoppingBagTableQuantity input::-webkit-outer-spin-button,
+.shoppingBagTableMobileQuantity input::-webkit-inner-spin-button,
+.shoppingBagTableMobileQuantity input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.checkoutNotice {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  background-color: #f6f6f6;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.checkoutNotice h4 {
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.checkoutNotice ul {
+  padding-left: 18px;
+}
+
+.checkoutNotice a {
+  color: black;
+  font-weight: 600;
 }
 
 /* -------------------------------- */
@@ -340,7 +413,7 @@
 }
 
 .checkoutDetailsSection h4 {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 500;
   text-transform: uppercase;
   margin-bottom: 20px;
@@ -402,7 +475,7 @@
 }
 
 .checkoutDetailsFormCheck label p {
-  font-size: 14px;
+  font-size: 16px;
   text-transform: uppercase;
 }
 
@@ -458,7 +531,7 @@
 }
 
 .checkoutTotalContainer h3 {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 500;
   text-transform: uppercase;
   margin-bottom: 20px;
@@ -471,7 +544,7 @@
 
 .checkoutItems table th {
   text-align: left;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 500;
   border-bottom: 1px solid #e4e4e4;
   text-transform: uppercase;
@@ -480,7 +553,7 @@
 
 .checkoutItems table td {
   padding: 12px 0;
-  font-size: 14px;
+  font-size: 16px;
   color: #595858;
 }
 
@@ -495,7 +568,7 @@
 
 .checkoutTotal table th {
   text-align: left;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 500;
   text-transform: uppercase;
   padding: 10px 0;
@@ -503,7 +576,7 @@
 
 .checkoutTotal table td {
   padding: 15px 0;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 500;
 }
 
@@ -566,17 +639,17 @@
 }
 
 .checkoutPaymentMethod span {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 500;
 }
 
 .checkoutPaymentMethod p {
-  font-size: 14px;
+  font-size: 16px;
 }
 
 .policyText {
-  font-size: 12px;
-  line-height: 24px;
+  font-size: 13px;
+  line-height: 1.7;
 }
 
 .policyText a {
@@ -637,7 +710,7 @@
 }
 
 .orderCompleteMessage p {
-  font-size: 14px;
+  font-size: 16px;
   color: #767676;
 }
 
@@ -657,12 +730,12 @@
 }
 
 .orderInfoItem p {
-  font-size: 14px;
+  font-size: 16px;
   color: #767676;
 }
 
 .orderInfoItem h4 {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 500;
 }
 
@@ -677,7 +750,7 @@
 }
 
 .orderTotalContainer h3 {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 500;
   text-transform: uppercase;
   padding: 30px 40px;
@@ -694,7 +767,7 @@
 
 .orderItems table th {
   text-align: left;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 500;
   border-bottom: 1px solid #e4e4e4;
   text-transform: uppercase;
@@ -703,7 +776,7 @@
 
 .orderItems table td {
   padding: 12px 0;
-  font-size: 14px;
+  font-size: 16px;
   color: #595858;
 }
 
@@ -723,7 +796,7 @@
 
 .orderTotal table th {
   text-align: left;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 500;
   text-transform: uppercase;
   padding: 10px 0;
@@ -731,7 +804,7 @@
 
 .orderTotal table td {
   padding: 15px 0;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 500;
 }
 
@@ -899,7 +972,7 @@
   }
 
   .shoppingBagTableMobileItemsDetailMain h4 {
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 400;
   }
 
@@ -909,12 +982,12 @@
   }
 
   .shoppingBagTableMobileItemsDetailMain p {
-    font-size: 14px;
+    font-size: 16px;
     color: #767676;
   }
 
   .shoppingBagTableMobileItemsDetailMain span {
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 500;
   }
 
@@ -929,7 +1002,7 @@
     background: none;
     border: none;
     cursor: pointer;
-    font-size: 16px;
+    font-size: 18px;
   }
 
   .shoppingBagTableMobileQuantity input {
@@ -948,7 +1021,7 @@
   }
 
   .shoppingBagTableMobileItemsDetailTotal p {
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 500;
   }
 
@@ -999,7 +1072,7 @@
 
   .shopCartFooterContainer form button {
     padding: 0 10px;
-    font-size: 12px;
+    font-size: 13px;
   }
 
   /* -------------------------------- */
@@ -1009,7 +1082,7 @@
 
 @media screen and (max-width: 320px) {
   .shoppingBagTableMobileItemsDetailMain h4 {
-    font-size: 14px;
+    font-size: 16px;
   }
   .shopCartFooterContainer form {
     gap: 0px;

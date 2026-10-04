@@ -1,101 +1,104 @@
 import React, { useState } from "react";
 import "./ContactPage.css";
 
-const ContactPage = () => {
-  const [name, setname] = useState("");
-  const [email, setEmail] = useState("");
-  const [message, setmessage] = useState("");
+import { storeInfo } from "../../Config/storeInfo";
+import useDocumentTitle from "../../Utils/useDocumentTitle";
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    alert(
-      `Thank You ${name} for Contacting Us. We will Get Back to You Soon.\n\nYour Mail Id - ${email}.\nYour Message is - ${message}`
-    );
-    setname("");
-    setEmail("");
-    setmessage("");
+// Until the backend can receive messages (P1), the form opens the visitor's
+// email app with the message pre-filled.
+const ContactPage = () => {
+  useDocumentTitle("Contact Us");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    const subject = encodeURIComponent(`Website enquiry from ${name}`);
+    const body = encodeURIComponent(`${message}\n\n${name}\n${email}`);
+    window.location.href = `mailto:${storeInfo.email}?subject=${subject}&body=${body}`;
   };
 
   return (
-    <>
-      <div className="contactSection">
-        <h2>Contact Us</h2>
-        <div className="contactMap">
-          <iframe
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d31103.83724193359!2d77.49987707431639!3d12.973153000000007!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bae3dbfcce44fe7%3A0x9f1232f74ddd3491!2sVijai%20Opticians!5e0!3m2!1sen!2sin!4v1754822205361!5m2!1sen!2sin"
-            width="600"
-            height="450"
-            allowfullscreen=""
-            loading="lazy"
-            referrerpolicy="no-referrer-when-downgrade"
-          ></iframe>
-          <iframe
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d31103.83724193359!2d77.49987707431639!3d12.973153000000007!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bae3ddd7435d42f%3A0xf832aa8367c3985!2sVijai%20Opticians!5e0!3m2!1sen!2sin!4v1754844269821!5m2!1sen!2sin"
-            width="600"
-            height="450"
-            allowfullscreen=""
-            loading="lazy"
-            referrerpolicy="no-referrer-when-downgrade"
-          ></iframe>
+    <section className="contactSection">
+      <h2>Contact Us</h2>
+
+      <div className="contactStores">
+        {storeInfo.stores.map((store) => (
+          <article className="contactStore" key={store.name}>
+            <iframe
+              title={`Map of our ${store.name} store`}
+              src={store.mapEmbed}
+              width="600"
+              height="450"
+              allowFullScreen
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+            />
+            <address className="address">
+              <h3>{store.name}</h3>
+              <p>{store.address}</p>
+              <p>
+                <span className="addressLabel">Phone</span>
+                <a href={store.phoneHref}>{store.phone}</a>
+              </p>
+              <p>
+                <span className="addressLabel">Email</span>
+                <a href={`mailto:${storeInfo.email}`}>{storeInfo.email}</a>
+              </p>
+            </address>
+          </article>
+        ))}
+      </div>
+
+      <div className="contactForm">
+        <div className="contactFormIntro">
+          <h3>Get In Touch</h3>
+          <p>
+            Questions about frames, lenses or an order? Fill in the form and
+            we’ll open your email app with the message ready to send, or call
+            either store.
+          </p>
         </div>
-        <div className="contactInfo">
-          <div className="contactAddress">
-            <div className="address">
-              <h3>Store in Basveshwar Nagar</h3>
-              <p>
-                476A, Siddhaiah Puranik Rd, 3rd Block, Sharada Colony, West of
-                Chord Road 3rd Stage, Basaveshwar Nagar, Bengaluru, Karnataka
-                560079
-              </p>
-              <p>
-                admin@dummymail.com
-                <br />
-                97313 07237
-              </p>
-            </div>
-            <div className="address">
-              <h3>Store in Vijayanagar</h3>
-              <p>
-                No.161/1, Dhanalaxmi Complex, 8th Main Rd, Govindaraja Nagar
-                Ward, MC Layout, Vijayanagar, Bengaluru, Karnataka 560040
-              </p>
-              <p>
-                contact@dummymail.com
-                <br />
-                080 2340 7691
-              </p>
-            </div>
-          </div>
-          <div className="contactForm">
-            <h3>Get In Touch</h3>
-            <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit}>
+          <div className="contactFormRow">
+            <div className="contactField">
+              <label htmlFor="contact-name">Name *</label>
               <input
+                id="contact-name"
                 type="text"
                 value={name}
-                placeholder="Name *"
-                onChange={(e) => setname(e.target.value)}
+                autoComplete="name"
+                onChange={(event) => setName(event.target.value)}
                 required
               />
+            </div>
+            <div className="contactField">
+              <label htmlFor="contact-email">Email address *</label>
               <input
+                id="contact-email"
                 type="email"
                 value={email}
-                placeholder="Email address *"
-                onChange={(e) => setEmail(e.target.value)}
+                autoComplete="email"
+                onChange={(event) => setEmail(event.target.value)}
                 required
               />
-              <textarea
-                rows={10}
-                cols={40}
-                placeholder="Your Message"
-                value={message}
-                onChange={(e) => setmessage(e.target.value)}
-              />
-              <button type="submit">Submit</button>
-            </form>
+            </div>
           </div>
-        </div>
+          <div className="contactField">
+            <label htmlFor="contact-message">Your message *</label>
+            <textarea
+              id="contact-message"
+              rows={7}
+              value={message}
+              onChange={(event) => setMessage(event.target.value)}
+              required
+            />
+          </div>
+          <button type="submit">Send Email</button>
+        </form>
       </div>
-    </>
+    </section>
   );
 };
 

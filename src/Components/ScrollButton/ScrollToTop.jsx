@@ -6,15 +6,13 @@ import { GoChevronUp } from "react-icons/go";
 
 const ScrollToTop = () => {
   const [showTopBtn, setShowTopBtn] = useState(false);
+
   useEffect(() => {
-    window.addEventListener("scroll", () => {
-      if (window.scrollY > 400) {
-        setShowTopBtn(true);
-      } else {
-        setShowTopBtn(false);
-      }
-    });
+    const onScroll = () => setShowTopBtn(window.scrollY > 400);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
   const goToTop = () => {
     window.scrollTo({
       top: 0,
@@ -25,9 +23,14 @@ const ScrollToTop = () => {
   return (
     <div className="top-to-btm">
       {showTopBtn && (
-        <div className="iconStyle" onClick={goToTop}>
+        <button
+          type="button"
+          className="iconStyle"
+          onClick={goToTop}
+          aria-label="Back to top"
+        >
           <GoChevronUp color="black" size={23} />
-        </div>
+        </button>
       )}
     </div>
   );

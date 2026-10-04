@@ -20,7 +20,7 @@
 }
 
 .resetPasswordContainer p {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 400;
   color: #767676;
 }
@@ -48,7 +48,7 @@
 }
 
 .resetPasswordSection p {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 400;
   color: #767676;
 }
@@ -61,4 +61,12 @@
   .resetPasswordContainer {
     width: 90%;
   }
+}
+
+.authNotice {
+  margin-top: 12px;
+  padding: 12px;
+  background-color: #f6f6f6;
+  font-size: 16px;
+  line-height: 1.5;
 }

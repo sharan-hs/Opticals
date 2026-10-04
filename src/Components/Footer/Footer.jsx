@@ -1,163 +1,128 @@
 import React from "react";
 import "./Footer.css";
-import logo from "../../Assets/logo.webp";
-import paymentIcon from "../../Assets/paymentIcon.png";
-import { FaFacebookF } from "react-icons/fa";
-import { FaXTwitter } from "react-icons/fa6";
-import { FaInstagram } from "react-icons/fa";
-import { FaYoutube } from "react-icons/fa";
-import { FaPinterest } from "react-icons/fa";
-
 import { Link } from "react-router-dom";
+import { FaFacebookF, FaInstagram, FaYoutube } from "react-icons/fa";
 
-const Footer = () => {
-  const handleSubscribe = (e) => {
-    e.preventDefault();
-    alert("Subscribed Successfully");
-  };
+import logo from "../../Assets/logo.webp";
+import { storeInfo } from "../../Config/storeInfo";
 
-  const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
-  };
+const SOCIAL_LINKS = [
+  { key: "instagram", label: "Instagram", Icon: FaInstagram },
+  { key: "facebook", label: "Facebook", Icon: FaFacebookF },
+  { key: "youtube", label: "YouTube", Icon: FaYoutube },
+].filter(({ key }) => storeInfo.social[key]);
 
-  const getCurrentYear = () => new Date().getFullYear();
+const FOOTER_COLUMNS = [
+  {
+    heading: "Company",
+    links: [
+      { to: "/about", label: "About Us" },
+      { to: "/contact", label: "Contact Us" },
+    ],
+  },
+  {
+    heading: "Shop",
+    links: [
+      { to: "/shop", label: "Shop All" },
+      { to: "/shop?category=Sunglasses", label: "Sunglasses" },
+      { to: "/cart", label: "Cart" },
+    ],
+  },
+  {
+    heading: "Help",
+    links: [
+      { to: "/loginSignUp", label: "My Account" },
+      { to: "/contact", label: "Store Locations" },
+      { to: "/terms", label: "Terms & Conditions" },
+      { to: "/privacy-policy", label: "Privacy Policy" },
+      { to: "/refund-policy", label: "Refunds & Cancellation" },
+      { to: "/shipping-policy", label: "Shipping & Delivery" },
+    ],
+  },
+];
 
-  return (
-    <>
-      <footer className="footer">
-        <div className="footer__container">
-          <div className="footer_left">
-            <div className="footer_logo_container">
-              <img src={logo} alt="" Z />
-            </div>
-
-            <p>
-              476A, Siddhaiah Puranik Road, 3rd Block, Sharada Colony, West of
-              Chord Road, 3rd Stage, Basaveshwar Nagar, Bengaluru, 560079
-            </p>
-
-            <div className="footer_address">
-              <strong> vachanvijai@gmail.com </strong>
-              <strong> +1 246-345-0695 </strong>
-            </div>
-
-            <div className="social_links">
-              <FaFacebookF />
-              <FaXTwitter />
-              <FaInstagram />
-              <FaYoutube />
-              <FaPinterest />
-            </div>
-          </div>
-
-          <div className="footer_content">
-            <h5>Company</h5>
-            <div className="links_container">
-              <ul onClick={scrollToTop}>
-                <li>
-                  <Link to="/about">About Us</Link>
-                </li>
-                <li>
-                  <Link to="/about">Career</Link>
-                </li>
-                <li>
-                  <Link to="*">Affilates</Link>
-                </li>
-                <li>
-                  <Link to="/blog">Blog</Link>
-                </li>
-                <li>
-                  <Link to="/contact">Contact Us</Link>
-                </li>
-              </ul>
-            </div>
-          </div>
-          <div className="footer_content">
-            <h5>Shop</h5>
-            <div className="links_container">
-              <ul onClick={scrollToTop}>
-                <li>
-                  <Link to="/shop">New Arrivals</Link>
-                </li>
-                <li>
-                  <Link to="/shop">Accessories</Link>
-                </li>
-                <li>
-                  <Link to="/shop">Men</Link>
-                </li>
-                <li>
-                  <Link to="/shop">Women</Link>
-                </li>
-                <li>
-                  <Link to="/shop">Shop All</Link>
-                </li>
-              </ul>
-            </div>
-          </div>
-          <div className="footer_content">
-            <h5>Help</h5>
-            <div className="links_container">
-              <ul onClick={scrollToTop}>
-                <li>
-                  <Link to="/contact">Customer Service</Link>
-                </li>
-                <li>
-                  <Link to="/loginSignUp">My Account</Link>
-                </li>
-                <li>
-                  <Link to="/contact">Find a Store</Link>
-                </li>
-                <li>
-                  <Link to="/terms">Legal & Privacy</Link>
-                </li>
-                <li>
-                  <Link to="/contact">Contact</Link>
-                </li>
-                <li>
-                  <Link to="/">Gift Card</Link>
-                </li>
-              </ul>
-            </div>
-          </div>
-          <div className="footer_right">
-            <h5>Subscribe</h5>
-            <p>
-              Be the first to get the latest news about trends, promotions, and
-              much more!
-            </p>
-
-            <form onSubmit={handleSubscribe}>
-              <input type="email" placeholder="Your email address" required />
-              <button type="submit">Join</button>
-            </form>
-
-            <h6>Secure Payments</h6>
-            <div className="paymentIconContainer">
-              <img src={paymentIcon} alt="" />
-            </div>
-          </div>
+const Footer = () => (
+  <footer className="footer">
+    <div className="footer__container">
+      <div className="footer_left">
+        <div className="footer_logo_container">
+          <img src={logo} alt={storeInfo.name} width={128} height={106} />
         </div>
-        <div className="footer_bottom">
+
+        <address className="footer_address">
+          {storeInfo.stores.map((store) => (
+            <p key={store.name}>
+              <strong>{store.name}</strong>
+              <br />
+              <a href={store.phoneHref}>{store.phone}</a>
+            </p>
+          ))}
           <p>
-            © {getCurrentYear()} Vijai Opticians. All Rights Reserved
-            {/* <a
-              href="https://github.com/shakti177"
-              target="_blank"
-              rel="noreferrer"
-              style={{ color: "#C22928", textDecoration: "none" }}
-            >
-              Shakti Tamrakar
-            </a>{" "}
-            with ❤️
-          </p> */}
+            <a href={`mailto:${storeInfo.email}`}>{storeInfo.email}</a>
           </p>
+        </address>
+
+        {SOCIAL_LINKS.length > 0 && (
+          <div className="social_links">
+            {SOCIAL_LINKS.map(({ key, label, Icon }) => (
+              <a
+                key={key}
+                href={storeInfo.social[key]}
+                target="_blank"
+                rel="noreferrer"
+                aria-label={label}
+              >
+                <Icon />
+              </a>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {FOOTER_COLUMNS.map((column) => (
+        <div className="footer_content" key={column.heading}>
+          <h5>{column.heading}</h5>
+          <div className="links_container">
+            <ul>
+              {column.links.map((link) => (
+                <li key={link.label}>
+                  <Link to={link.to}>{link.label}</Link>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
-      </footer>
-    </>
-  );
-};
+      ))}
+    </div>
+
+    <div className="footer_bottom">
+      <p>
+        © {new Date().getFullYear()} {storeInfo.name}. All Rights Reserved
+      </p>
+      <p className="footer_credits">
+        3D model: “
+        <a
+          href="https://sketchfab.com/3d-models/eyewear-specs-bb1a41bb9d4d412c985ba1492985e90f"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Eyewear (Specs)
+        </a>
+        ” by{" "}
+        <a href="https://sketchfab.com/rojencha" target="_blank" rel="noreferrer">
+          rojencha
+        </a>
+        , licensed under{" "}
+        <a
+          href="http://creativecommons.org/licenses/by/4.0/"
+          target="_blank"
+          rel="noreferrer"
+        >
+          CC BY 4.0
+        </a>
+      </p>
+    </div>
+  </footer>
+);
 
 export default Footer;

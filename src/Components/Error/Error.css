@@ -15,6 +15,11 @@
   font-weight: 700;
 }
 
+.errorContainer h1.errorSmallTitle {
+  font-size: 32px;
+  font-weight: 600;
+}
+
 .errorContainer h3 {
   font-size: 26px;
   font-weight: 600;
@@ -22,7 +27,7 @@
 }
 
 .errorContainer p {
-  font-size: 14px;
+  font-size: 16px;
   text-align: center;
   margin-bottom: 16px;
 }
@@ -31,7 +36,7 @@
   text-decoration: none;
   background-color: black;
   color: white;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 500;
   padding: 20px 140px;
   transition: background-color 0.3s;
@@ -64,11 +69,11 @@
   }
 
   .errorContainer h3 {
-    font-size: 20px;
+    font-size: 22px;
   }
 
   .errorContainer p {
-    font-size: 12px;
+    font-size: 13px;
   }
 
   .errorContainer a {
