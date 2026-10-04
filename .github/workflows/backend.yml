@@ -1,0 +1,51 @@
+name: Backend
+
+on:
+  push:
+    branches: [main]
+    paths: ["backend/**", ".github/workflows/backend.yml"]
+  pull_request:
+    paths: ["backend/**", ".github/workflows/backend.yml"]
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          # Throwaway CI database, not a real credential.
+          POSTGRES_USER: opticals
+          POSTGRES_PASSWORD: opticals
+          POSTGRES_DB: opticals_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U opticals"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      APP_ENV: test
+      TEST_DATABASE_URL: postgresql+psycopg://opticals:opticals@localhost:5432/opticals_test
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - run: uv sync --locked
+      - name: Lint
+        run: |
+          uv run ruff check .
+          uv run ruff format --check .
+      - name: Type check
+        run: uv run mypy app tests alembic/env.py
+      - name: Migrations apply and reverse
+        run: |
+          uv run alembic upgrade head
+          uv run alembic downgrade base
+          uv run alembic upgrade head
+      - name: Tests
+        run: uv run pytest --cov --cov-report=term-missing
