@@ -10,15 +10,15 @@ Companion to [ARCHITECTURE_PLAN.md](ARCHITECTURE_PLAN.md). Section references li
 
 ## Progress
 
-Last updated: 2026-10-04 14:46
+Last updated: 2026-10-04 19:04
 
-_Phase 1: Build, 32 tests and lint pass. Paused for user testing (docs/PHASE1_TESTING.md) before Phase 2._
+_Status: Phase 1 committed + pushed (b261f78). Phase 2 foundation done on branch phase2/backend-foundation: 44 backend tests, ruff + mypy clean. Waiting on user: open PRs (no gh CLI), enable branch protection._
 
 | Phase | Done | In progress | Total | % done |
 |---|---:|---:|---:|---:|
 | Phase 0 | 3 | 0 | 17 | 18% |
-| Phase 1 | 120 | 6 | 130 | 92% |
-| Phase 2 | 0 | 0 | 31 | 0% |
+| Phase 1 | 120 | 7 | 130 | 92% |
+| Phase 2 | 26 | 4 | 31 | 84% |
 | Phase 3 | 0 | 0 | 30 | 0% |
 | Phase 4 | 0 | 0 | 32 | 0% |
 | Phase 5 | 0 | 0 | 39 | 0% |
@@ -31,25 +31,25 @@ _Phase 1: Build, 32 tests and lint pass. Paused for user testing (docs/PHASE1_TE
 | Phase 12 | 0 | 0 | 21 | 0% |
 | P1 | 0 | 0 | 12 | 0% |
 | P2 | 0 | 0 | 7 | 0% |
-| **All** | **123** | **6** | **416** | **30%** |
+| **All** | **149** | **11** | **416** | **36%** |
 
 **Recently completed**
-- 1.15.3 Cloudinary cloud name from VITE_CLOUDINARY_CLOUD_NAME
+- 2.5.1/2.5.2 pytest fixtures + 44 backend tests
+- 2.4.1–2.4.3 Alembic, citext/pg_trgm migration, migration docs
+- 2.3.3–2.3.16 FastAPI scaffold: config, DB, errors, logging, security headers/CORS, health, pagination, money, CLI, Sentry
+- 2.2.1–2.2.3 uv + Python 3.12, PostgreSQL 18.6, dev/test databases
+- 2.1.1–2.1.4 Monorepo restructure (frontend/, backend/, docs/, workflows)
+- Phase 1 UI follow-ups: 16px body type, form controls inherit font, About/Contact layouts reworked, Add-to-Cart width fixed
+- 1.1.8 Phase 1 committed (b261f78) and pushed
+- 1.15.3 Cloudinary cloud name from env
 - 1.13.3 Explicit image dimensions everywhere
-- 1.15.2–1.15.6, 1.15.8, 1.15.9 Vite 5, ESLint, Vitest + RTL
-- 1.13.1/1.13.2 Route-level lazy loading, local images ≤ 76 KB
-- 1.12.2/1.12.3/1.12.6 Manifest icons, favicon, contrast
-- 1.11.4 Legal page drafts + 1.8.9 footer links
-- 1.10.11 Old scene.gltf/bin removed
-- 1.6.14 Filter drawer focus handling
-- 1.4.14/1.6.16 Cart and shop unit tests (32 tests pass)
-- 1.11.x / 1.10.x / 1.9.x (previous batch)
 
 **Up next**
-- User testing of Phase 1 (docs/PHASE1_TESTING.md)
-- 1.1.8 Open PR `phase1/frontend-cleanup` → `main`
-- 1.15.1 Install Node 22 LTS
-- Phase 2.1 Repository restructure
+- 👤 Open PRs for phase1/frontend-cleanup and phase2/backend-foundation (GitHub link)
+- 2.5.3/2.5.4 First CI run after push
+- 2.5.5 👤 Enable branch protection on main
+- 2.3.1/2.3.2 Remaining dependencies when Phase 3/4 need them
+- Phase 3.1 Database models
 
 ---
 
@@ -81,7 +81,10 @@ Work top to bottom inside a phase unless a dependency says otherwise.
 
 ## Phase 1 — Frontend cleanup (existing React app, static data)
 
-> ✅ Build, 32 tests and lint pass. Paused for user testing (docs/PHASE1_TESTING.md) before Phase 2.
+> ✅ Phase 1 committed + pushed (b261f78). Phase 2 foundation done on branch phase2/backend-foundation: 44 backend tests, ruff + mypy clean. Waiting on user: open PRs (no gh CLI), enable branch protection.
+
+> ✅ Phase 1 committed + pushed (b261f78). Phase 2 foundation done on branch phase2/backend-foundation: 44 backend tests, ruff + mypy clean. Waiting on user: open PRs (no gh CLI), enable branch protection.
+
 
 
 > ✅ Vite build passes (0 warnings), `npm test` 32/32, `npm run lint` 0 warnings. Final headless audit running.
@@ -96,7 +99,7 @@ Work top to bottom inside a phase unless a dependency says otherwise.
 - [x] 1.1.5 Extend `.gitignore` (`build/`, `dist/`, `coverage/`, `.env.*` except `.env.example`, editor folders)
 - [x] 1.1.6 Rename package `uomo` → `vijai-opticians-web`
 - [x] 1.1.7 Rewrite `README.md` (what it is, setup, scripts, structure, link to docs) _(updated for Vite)_
-- [ ] 1.1.8 Open PR `phase1/frontend-cleanup` → `main` at the end of Phase 1 and merge _(waiting for user testing)_
+- [~] 1.1.8 Open PR `phase1/frontend-cleanup` → `main` at the end of Phase 1 and merge _(committed b261f78 and pushed; PR to open via GitHub link (gh CLI not installed))_
 - **Done when:** working tree clean, branch pushed, no junk files tracked.
 
 ### 1.2 One product data model
@@ -268,45 +271,45 @@ Work top to bottom inside a phase unless a dependency says otherwise.
 ## Phase 2 — FastAPI foundation
 
 ### 2.1 Repository restructure
-- [ ] 2.1.1 Monorepo: `git mv` app into `frontend/`; create `backend/`, `docs/`, `.github/workflows/`
-- [ ] 2.1.2 Move `docs/ARCHITECTURE_PLAN.md` and `docs/TASKS.md` into the repo
-- [ ] 2.1.3 Netlify base directory → `frontend`
-- [ ] 2.1.4 Root README with links to frontend/backend setup
+- [x] 2.1.1 Monorepo: `git mv` app into `frontend/`; create `backend/`, `docs/`, `.github/workflows/` _(frontend/ via git mv, backend/, docs/, .github/workflows/)_
+- [x] 2.1.2 Move `docs/ARCHITECTURE_PLAN.md` and `docs/TASKS.md` into the repo
+- [x] 2.1.3 Netlify base directory → `frontend` _(netlify.toml base = "frontend"; check Netlify UI base dir isn't overriding it)_
+- [x] 2.1.4 Root README with links to frontend/backend setup
 
 ### 2.2 Local environment
-- [ ] 2.2.1 Install `uv`; `uv python install 3.12`
-- [ ] 2.2.2 Install PostgreSQL 16/17 (Postgres.app or Homebrew)
-- [ ] 2.2.3 Create roles + databases `opticals_dev`, `opticals_test`
+- [x] 2.2.1 Install `uv`; `uv python install 3.12` _(uv 0.12.23, Python 3.12.15 in ~/.local)_
+- [x] 2.2.2 Install PostgreSQL 16/17 (Postgres.app or Homebrew) _(Postgres.app, PostgreSQL 18.6)_
+- [x] 2.2.3 Create roles + databases `opticals_dev`, `opticals_test` _(role opticals, password auth via pg_hba scram rule; opticals_dev, opticals_test)_
 
 ### 2.3 Backend scaffold
-- [ ] 2.3.1 `uv init`; dependencies (fastapi, uvicorn, pydantic, pydantic-settings, sqlalchemy, psycopg[binary], alembic, pyjwt, pwdlib[argon2], slowapi, httpx, typer, cloudinary, razorpay, sentry-sdk)
-- [ ] 2.3.2 Dev dependencies (pytest, pytest-cov, ruff, mypy, factory-boy/polyfactory, freezegun)
-- [ ] 2.3.3 ruff config (lint + format), mypy config
-- [ ] 2.3.4 `.env.example`, `.gitignore`
-- [ ] 2.3.5 `core/config.py`: settings by `APP_ENV`, refuse to start in prod with default secrets
-- [ ] 2.3.6 `core/database.py`: engine (pool settings), `SessionLocal`, `get_db` (rollback on error)
-- [ ] 2.3.7 `models/base.py`: `DeclarativeBase` + naming convention
-- [ ] 2.3.8 `core/errors.py`: `AppError` hierarchy (NotFound, Conflict, Forbidden, BusinessRule), handlers for AppError / RequestValidationError / IntegrityError / unhandled → error envelope
-- [ ] 2.3.9 `core/logging.py`: JSON logs, request-id middleware, access log with latency
-- [ ] 2.3.10 Security headers middleware; CORS with exact origins + credentials
-- [ ] 2.3.11 `main.py`: app factory, lifespan, `/api/v1` router, docs disabled in production
-- [ ] 2.3.12 `GET /health`, `GET /health/ready` (DB + Alembic head)
-- [ ] 2.3.13 Pagination dependency + generic `Page[T]` schema
-- [ ] 2.3.14 Money helpers (paise ↔ rupees, formatting)
-- [ ] 2.3.15 `cli.py` (Typer) skeleton
-- [ ] 2.3.16 Sentry init (no-op without DSN)
+- [~] 2.3.1 `uv init`; dependencies (fastapi, uvicorn, pydantic, pydantic-settings, sqlalchemy, psycopg[binary], alembic, pyjwt, pwdlib[argon2], slowapi, httpx, typer, cloudinary, razorpay, sentry-sdk) _(installed what Phase 2 uses (fastapi, uvicorn, pydantic-settings, sqlalchemy, psycopg, alembic, typer, sentry-sdk); pyjwt/pwdlib/slowapi in Phase 3, cloudinary/razorpay in their phases)_
+- [~] 2.3.2 Dev dependencies (pytest, pytest-cov, ruff, mypy, factory-boy/polyfactory, freezegun) _(pytest, pytest-cov, httpx2, ruff, mypy; factory-boy/freezegun added when models need them)_
+- [x] 2.3.3 ruff config (lint + format), mypy config
+- [x] 2.3.4 `.env.example`, `.gitignore`
+- [x] 2.3.5 `core/config.py`: settings by `APP_ENV`, refuse to start in prod with default secrets
+- [x] 2.3.6 `core/database.py`: engine (pool settings), `SessionLocal`, `get_db` (rollback on error)
+- [x] 2.3.7 `models/base.py`: `DeclarativeBase` + naming convention
+- [x] 2.3.8 `core/errors.py`: `AppError` hierarchy (NotFound, Conflict, Forbidden, BusinessRule), handlers for AppError / RequestValidationError / IntegrityError / unhandled → error envelope
+- [x] 2.3.9 `core/logging.py`: JSON logs, request-id middleware, access log with latency
+- [x] 2.3.10 Security headers middleware; CORS with exact origins + credentials _(security headers + CORS exact origins with credentials; HSTS/CSP in production only)_
+- [x] 2.3.11 `main.py`: app factory, lifespan, `/api/v1` router, docs disabled in production
+- [x] 2.3.12 `GET /health`, `GET /health/ready` (DB + Alembic head)
+- [x] 2.3.13 Pagination dependency + generic `Page[T]` schema
+- [x] 2.3.14 Money helpers (paise ↔ rupees, formatting)
+- [x] 2.3.15 `cli.py` (Typer) skeleton
+- [x] 2.3.16 Sentry init (no-op without DSN)
 
 ### 2.4 Alembic
-- [ ] 2.4.1 `alembic init`; `env.py` uses settings + `Base.metadata`, `compare_type=True`
-- [ ] 2.4.2 Migration: extensions `citext`, `pg_trgm`
-- [ ] 2.4.3 Document the migration workflow in backend README (§Appendix D)
+- [x] 2.4.1 `alembic init`; `env.py` uses settings + `Base.metadata`, `compare_type=True`
+- [x] 2.4.2 Migration: extensions `citext`, `pg_trgm` _(migration 5c04a4daf21d; upgrade/downgrade/upgrade verified)_
+- [x] 2.4.3 Document the migration workflow in backend README (§Appendix D) _(backend/README.md)_
 
 ### 2.5 Tests & CI
-- [ ] 2.5.1 pytest fixtures: test DB setup (migrate once), per-test transaction rollback, `TestClient`, factories
-- [ ] 2.5.2 Tests for health, error envelope, CORS
-- [ ] 2.5.3 GitHub Actions backend: ruff, mypy, `alembic upgrade head`, pytest (Postgres service)
-- [ ] 2.5.4 GitHub Actions frontend: lint, test, build
-- [ ] 2.5.5 Branch protection on `main` (CI must pass)
+- [x] 2.5.1 pytest fixtures: test DB setup (migrate once), per-test transaction rollback, `TestClient`, factories
+- [x] 2.5.2 Tests for health, error envelope, CORS _(44 tests: health, readiness 503 paths, error envelope, integrity 409, 500 hiding details, CORS, security headers, config guards, money, pagination)_
+- [~] 2.5.3 GitHub Actions backend: ruff, mypy, `alembic upgrade head`, pytest (Postgres service) _(workflows written; first run happens when the branch is pushed)_
+- [~] 2.5.4 GitHub Actions frontend: lint, test, build _(workflows written; first run happens when the branch is pushed)_
+- [ ] 2.5.5 Branch protection on `main` (CI must pass) _(👤 user: GitHub → Settings → Branches)_
 - **Done when:** `/api/v1/health/ready` returns 200 locally and in CI.
 
 ---
