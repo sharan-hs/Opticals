@@ -21,12 +21,58 @@
   cursor: pointer;
 }
 
-/* Filter Color */
+/* =========================
+   COLOR PILLS (NEW UI)
+========================= */
 
-.filterColorBtn {
+.colorPills {
   display: flex;
   flex-wrap: wrap;
-  gap: 25px;
+  gap: 10px;
+}
+
+.colorPill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border: 1px solid #e4e4e4;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  font-size: 13px;
+  background: #fff;
+}
+
+.colorPill:hover {
+  border-color: #000;
+}
+
+.colorPill.selected {
+  background-color: #000;
+  color: #fff;
+  border-color: #000;
+}
+
+.colorDot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid #ccc;
+}
+
+.colorLabel {
+  text-transform: capitalize;
+}
+
+/* =========================
+   OLD COLOR GRID (kept safe fallback)
+========================= */
+
+.filterColorBtn {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 15px;
 }
 
 .filterColorBtn button {
@@ -38,6 +84,8 @@
   outline: none;
   border: none;
   position: relative;
+  height: 20px;
+  width: 20px;
 }
 
 .filterColorBtn button.selected::after {
@@ -50,10 +98,11 @@
   height: calc(100% + 12px);
   left: -6px;
   top: -6px;
-  transition: all 0.3s ease;
 }
 
-/* filter Sizes */
+/* =========================
+   SIZE (unchanged)
+========================= */
 
 .sizeButtons {
   display: flex;
@@ -65,9 +114,7 @@
   background-color: white;
   padding: 6px 20px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
   border: 1px solid #e4e4e4;
-  outline: none;
   font-size: 14px;
 }
 
@@ -79,7 +126,9 @@
   background-color: #e4e4e4;
 }
 
-/* filter brands */
+/* =========================
+   BRANDS
+========================= */
 
 .searchBar {
   position: relative;
@@ -121,7 +170,6 @@
   border: 2px solid #e4e4e4;
   position: relative;
   cursor: pointer;
-  outline: none;
 }
 
 .brandRadio:checked {
@@ -130,7 +178,6 @@
 
 .brandRadio::after {
   content: "";
-  display: block;
   width: 8px;
   height: 8px;
   background-color: black;
@@ -162,21 +209,61 @@
   color: #767676;
 }
 
-/* Filter Slider */
+/* =========================
+   PRICE
+========================= */
 
 .priceRange {
   display: flex;
-  gap: 20px;
-  align-items: center;
   justify-content: space-between;
 }
 
 .priceRange p {
   font-size: 14px;
   color: #767676;
-  font-weight: 400;
 }
 
-.priceRange p span {
+.priceRange span {
   color: black;
+}
+
+/* =========================
+   CLEAR FILTERS UI
+========================= */
+
+.clearAllWrapper {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.clearAllBtn {
+  font-size: 12px;
+  padding: 6px 10px;
+  border: 1px solid #000;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.clearAllBtn:hover {
+  background: #000;
+  color: #fff;
+}
+
+.filterHeaderRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.clearBtn {
+  font-size: 12px;
+  color: #767676;
+  cursor: pointer;
+}
+
+.clearBtn:hover {
+  color: #000;
+  text-decoration: underline;
 }

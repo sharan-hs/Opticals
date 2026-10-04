@@ -1,10 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./ShopDetails.css";
 import { useDispatch, useSelector } from "react-redux";
 import { addToCart } from "../../../Features/Cart/cartSlice";
+import { getProductImages } from "../../../Utils/cloudinary";
 import Filter from "../Filters/Filter";
 import { Link } from "react-router-dom";
-import StoreData from "../../../Data/StoreData";
+// import StoreData from "../../../Data/StoreData";
+import { productMeta } from "../../../Utils/metadata" // create this file
+
 import { FiHeart } from "react-icons/fi";
 import { FaStar } from "react-icons/fa";
 import { IoFilterSharp, IoClose } from "react-icons/io5";
@@ -15,12 +18,15 @@ import toast from "react-hot-toast";
 const ShopDetails = () => {
   const dispatch = useDispatch();
   const [wishList, setWishList] = useState({});
+  const [products, setProducts] = useState([]);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [filters, setFilters] = useState({
     category: "All",
-    price: [20, 90],
+    price: [0, 20000],
     brands: [],
+    colors: [], // 👈 ADD
   });
+
   const [sortOption, setSortOption] = useState("default");
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 6;
@@ -48,6 +54,27 @@ const ShopDetails = () => {
   };
 
   const cartItems = useSelector((state) => state.cart.items);
+
+
+
+  useEffect(() => {
+    const generatedProducts = Object.keys(productMeta).map((id) => {
+      const imgs = getProductImages(id, 6);
+
+      console.log("Product:", id);
+      console.log("Images:", imgs);
+
+      return {
+        productID: id,
+        ...productMeta[id],
+        images: imgs,
+      };
+    });
+
+    setProducts(generatedProducts);
+  }, []);
+
+
 
   const handleAddToCart = (product) => {
     const productInCart = cartItems.find(
@@ -82,9 +109,8 @@ const ShopDetails = () => {
     }
   };
 
-  const handleFilterChange = ({ category, price, brands }) => {
-    setFilters({ category, price, brands });
-    setCurrentPage(1); // Reset to first page when filters change
+  const handleFilterChange = ({ category, price, brands, colors }) => {
+    setFilters({ category, price, brands, colors });
   };
 
   const handleSortChange = (e) => {
@@ -92,48 +118,45 @@ const ShopDetails = () => {
     setCurrentPage(1);
   };
 
-  // Filter products based on category, price, and brands
-  const filteredProducts = StoreData.filter((product) => {
-    // Category filter
-    let categoryMatch = true;
-    if (filters.category !== "All") {
-      categoryMatch = product.productName
-        .toLowerCase()
-        .includes(filters.category.toLowerCase());
-    }
 
-    // Price filter
-    const priceMatch =
-      product.productPrice >= filters.price[0] &&
-      product.productPrice <= filters.price[1];
 
-    // Brand filter (map product names to brands)
-    let brandMatch = true;
-    if (filters.brands.length > 0) {
-      brandMatch = filters.brands.some((brand) =>
-        product.productName.toLowerCase().includes(brand.toLowerCase())
+  const filteredProducts = products.filter((product) => {
+    let categoryMatch = filters.category === "All" ||
+      product.category?.toLowerCase().includes(filters.category.toLowerCase());
+
+    let priceMatch =
+      product.price >= filters.price[0] &&
+      product.price <= filters.price[1];
+
+    let brandMatch =
+      filters.brands.length === 0 ||
+      filters.brands.some((brand) =>
+        product.brand?.toLowerCase().includes(brand.toLowerCase())
       );
-    }
 
-    return categoryMatch && priceMatch && brandMatch;
+    let colorMatch =
+      filters.colors.length === 0 ||
+      filters.colors.includes(product.color); // 👈 IMPORTANT
+
+    return categoryMatch && priceMatch && brandMatch && colorMatch;
   });
 
   const sortedProducts = [...filteredProducts].sort((a, b) => {
     switch (sortOption) {
       case "lowToHigh":
-        return a.productPrice - b.productPrice;
+        return a.price - b.price;
       case "highToLow":
-        return b.productPrice - a.productPrice;
+        return b.price - a.price;
       case "a-z":
-        return a.productName.localeCompare(b.productName);
+        return a.name.localeCompare(b.name);
       case "z-a":
-        return b.productName.localeCompare(a.productName);
+        return b.name.localeCompare(a.name);
       case "bestSelling":
         const getReviewCount = (reviews) =>
           parseInt(reviews.replace(/\D/g, "")) *
           (reviews.includes("k") ? 1000 : 1);
         return (
-          getReviewCount(b.productReviews) - getReviewCount(a.productReviews)
+          getReviewCount(b.reviews) - getReviewCount(a.reviews)
         );
       case "newToOld":
       case "oldToNew":
@@ -164,7 +187,10 @@ const ShopDetails = () => {
       <div className="shopDetails">
         <div className="shopDetailMain">
           <div className="shopDetails__left">
-            <Filter onFilterChange={handleFilterChange} />
+            <Filter
+              onFilterChange={handleFilterChange}
+              products={products}
+            />
           </div>
           <div className="shopDetails__right">
             <div className="shopDetailsSorting">
@@ -208,17 +234,18 @@ const ShopDetails = () => {
                   currentProducts.map((product) => (
                     <div className="sdProductContainer" key={product.productID}>
                       <div className="sdProductImages">
-                        <Link to="/Product" onClick={scrollToTop}>
+                        <Link to="/product" state={{ product }}>
                           <img
-                            src={product.frontImg}
+                            src={product.images[0]}
                             alt=""
                             className="sdProduct_front"
                           />
-                          {product.backImg && (
+                          {product.images[1] && (
                             <img
-                              src={product.backImg}
+                              src={product.images[1]}
                               alt=""
                               className="sdProduct_back"
+                              onError={(e) => (e.target.style.display = "none")}
                             />
                           )}
                         </Link>
@@ -235,15 +262,15 @@ const ShopDetails = () => {
                       <div className="sdProductInfo">
                         <div className="sdProductCategoryWishlist">
                           <p>
-                            {product.productName
+                            {product.name
                               .toLowerCase()
                               .includes("sunglasses")
                               ? "Sunglasses"
-                              : product.productName
-                                  .toLowerCase()
-                                  .includes("blue light")
-                              ? "Blue Light Glasses"
-                              : "Reading Glasses"}
+                              : product.name
+                                .toLowerCase()
+                                .includes("blue light")
+                                ? "Blue Light Glasses"
+                                : "Reading Glasses"}
                           </p>
                           <FiHeart
                             onClick={() =>
@@ -258,10 +285,10 @@ const ShopDetails = () => {
                           />
                         </div>
                         <div className="sdProductNameInfo">
-                          <Link to="/product" onClick={scrollToTop}>
-                            <h5>{product.productName}</h5>
+                          <Link to="/product" state={{ product }}>
+                            <h5>{product.name}</h5>
                           </Link>
-                          <p>${product.productPrice}</p>
+                          <p>₹{product.price}</p>
                           <div className="sdProductRatingReviews">
                             <div className="sdProductRatingStar">
                               <FaStar color="#FEC78A" size={10} />
@@ -270,7 +297,7 @@ const ShopDetails = () => {
                               <FaStar color="#FEC78A" size={10} />
                               <FaStar color="#FEC78A" size={10} />
                             </div>
-                            <span>{product.productReviews}</span>
+                            <span>{product.reviews}</span>
                           </div>
                         </div>
                       </div>
@@ -339,7 +366,10 @@ const ShopDetails = () => {
           <IoClose onClick={closeDrawer} className="closeButton" size={26} />
         </div>
         <div className="drawerContent">
-          <Filter onFilterChange={handleFilterChange} />
+          <Filter
+            onFilterChange={handleFilterChange}
+            products={products}
+          />
         </div>
       </div>
     </>
