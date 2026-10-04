@@ -10,16 +10,16 @@ Companion to [ARCHITECTURE_PLAN.md](ARCHITECTURE_PLAN.md). Section references li
 
 ## Progress
 
-Last updated: 2026-10-04 19:04
+Last updated: 2026-10-04 19:22
 
-_Status: Phase 1 committed + pushed (b261f78). Phase 2 foundation done on branch phase2/backend-foundation: 44 backend tests, ruff + mypy clean. Waiting on user: open PRs (no gh CLI), enable branch protection._
+_Status: Phase 3 (database) done on phase2/backend-foundation (8698019): 21 tables, 7 migrations, seed, 70 backend tests. Deployment switched to Vercel under the owner's account (docs/DEPLOYMENT.md). Next: Phase 4 auth._
 
 | Phase | Done | In progress | Total | % done |
 |---|---:|---:|---:|---:|
-| Phase 0 | 3 | 0 | 17 | 18% |
+| Phase 0 | 3 | 0 | 18 | 17% |
 | Phase 1 | 120 | 7 | 130 | 92% |
 | Phase 2 | 26 | 4 | 31 | 84% |
-| Phase 3 | 0 | 0 | 30 | 0% |
+| Phase 3 | 28 | 2 | 30 | 93% |
 | Phase 4 | 0 | 0 | 32 | 0% |
 | Phase 5 | 0 | 0 | 39 | 0% |
 | Phase 6 | 0 | 0 | 14 | 0% |
@@ -28,28 +28,27 @@ _Status: Phase 1 committed + pushed (b261f78). Phase 2 foundation done on branch
 | Phase 9 | 0 | 0 | 15 | 0% |
 | Phase 10 | 0 | 0 | 10 | 0% |
 | Phase 11 | 0 | 0 | 24 | 0% |
-| Phase 12 | 0 | 0 | 21 | 0% |
+| Phase 12 | 0 | 2 | 21 | 0% |
 | P1 | 0 | 0 | 12 | 0% |
 | P2 | 0 | 0 | 7 | 0% |
-| **All** | **149** | **11** | **416** | **36%** |
+| **All** | **177** | **15** | **417** | **42%** |
 
 **Recently completed**
-- 2.5.1/2.5.2 pytest fixtures + 44 backend tests
-- 2.4.1–2.4.3 Alembic, citext/pg_trgm migration, migration docs
-- 2.3.3–2.3.16 FastAPI scaffold: config, DB, errors, logging, security headers/CORS, health, pagination, money, CLI, Sentry
-- 2.2.1–2.2.3 uv + Python 3.12, PostgreSQL 18.6, dev/test databases
-- 2.1.1–2.1.4 Monorepo restructure (frontend/, backend/, docs/, workflows)
-- Phase 1 UI follow-ups: 16px body type, form controls inherit font, About/Contact layouts reworked, Add-to-Cart width fixed
+- 3.3.x Seed: categories, brands, 7 models / 11 variants, 64 images, inventory at 0, store settings
+- 3.3.8 ER diagram (docs/DATABASE.md)
+- 3.2.1–3.2.4 7 migrations, round-trip CI, models-match-migrations test, 23 constraint tests
+- 3.1.1–3.1.18 21 tables with mixins, CHECKs, indexes, lazy="raise"
+- Deployment switched to Vercel on owner's accounts (docs/DEPLOYMENT.md; 12.4/12.5 config written)
+- 2.5.1/2.5.2 pytest fixtures + backend tests (now 70)
+- 2.1–2.4 Monorepo, local env, FastAPI scaffold, Alembic
 - 1.1.8 Phase 1 committed (b261f78) and pushed
-- 1.15.3 Cloudinary cloud name from env
-- 1.13.3 Explicit image dimensions everywhere
 
 **Up next**
-- 👤 Open PRs for phase1/frontend-cleanup and phase2/backend-foundation (GitHub link)
-- 2.5.3/2.5.4 First CI run after push
-- 2.5.5 👤 Enable branch protection on main
-- 2.3.1/2.3.2 Remaining dependencies when Phase 3/4 need them
-- Phase 3.1 Database models
+- Phase 4.1 Backend auth: security.py, JWT, register/login/refresh
+- 👤 Open PRs; 2.5.5 enable branch protection
+- 👤 12.2 Owner accounts (GitHub transfer, Vercel Pro, Neon)
+- 👤 0.4.x Confirm Cloudinary account ownership
+- 3.3.4/3.3.5 Image dimensions + stock counts once owner provides API key / counts
 
 ---
 
@@ -76,10 +75,13 @@ Work top to bottom inside a phase unless a dependency says otherwise.
   - [ ] 0.4.11 About page: real mission/vision text, photos
   - [ ] 0.4.12 Initial stock counts per SKU
   - [ ] 0.4.13 Who is the Razorpay account holder (KYC documents, bank account)?
+  - [ ] 0.4.x 👤 Is Cloudinary cloud dyf8dp9oo the owner's account? If not, create one on vachanvijai@gmail.com and move images
 
 ---
 
 ## Phase 1 — Frontend cleanup (existing React app, static data)
+
+> ✅ Phase 3 (database) done on phase2/backend-foundation (8698019): 21 tables, 7 migrations, seed, 70 backend tests. Deployment switched to Vercel under the owner's account (docs/DEPLOYMENT.md). Next: Phase 4 auth.
 
 > ✅ Phase 1 committed + pushed (b261f78). Phase 2 foundation done on branch phase2/backend-foundation: 44 backend tests, ruff + mypy clean. Waiting on user: open PRs (no gh CLI), enable branch protection.
 
@@ -258,7 +260,7 @@ Work top to bottom inside a phase unless a dependency says otherwise.
 - [ ] 1.15.1 👤/dev Install Node 22 LTS locally (Node 18 is EOL; Vite needs ≥ 20.19) _(Homebrew Node 20.8 also present but too old; Node 22 install still needed)_
 - [x] 1.15.2 CRA → Vite: install `vite` + `@vitejs/plugin-react`; move `index.html` to root; rename JSX `.js` → `.jsx`; replace `%PUBLIC_URL%`; scripts `dev/build/preview` _(Vite 5 because local Node is 18.18; upgrade to Vite 7 after 1.15.1)_
 - [x] 1.15.3 `.env.example` with `VITE_CLOUDINARY_CLOUD_NAME` (and later `VITE_API_BASE_URL`) _(reads VITE_CLOUDINARY_CLOUD_NAME with fallback; listed in .env.example)_
-- [x] 1.15.4 Netlify: publish dir `dist`, `NODE_VERSION`, keep SPA redirect, cache headers for `/assets/*` and `/models/*` _(publish dir kept as build/, NODE_VERSION 20)_
+- [x] 1.15.4 Netlify: publish dir `dist`, `NODE_VERSION`, keep SPA redirect, cache headers for `/assets/*` and `/models/*` _(publish dir kept as build/, NODE_VERSION 20; superseded: Netlify replaced by Vercel (netlify.toml removed))_
 - [x] 1.15.5 Remove `react-scripts`, `web-vitals`, CRA test files
 - [x] 1.15.6 ESLint (flat config, react, react-hooks, jsx-a11y) — 0 warnings _(legacy .eslintrc, flat config later)_
 - [ ] 1.15.7 Prettier config + format pass _(deferred to avoid a repo-wide reformat diff during testing)_
@@ -273,7 +275,7 @@ Work top to bottom inside a phase unless a dependency says otherwise.
 ### 2.1 Repository restructure
 - [x] 2.1.1 Monorepo: `git mv` app into `frontend/`; create `backend/`, `docs/`, `.github/workflows/` _(frontend/ via git mv, backend/, docs/, .github/workflows/)_
 - [x] 2.1.2 Move `docs/ARCHITECTURE_PLAN.md` and `docs/TASKS.md` into the repo
-- [x] 2.1.3 Netlify base directory → `frontend` _(netlify.toml base = "frontend"; check Netlify UI base dir isn't overriding it)_
+- [x] 2.1.3 Netlify base directory → `frontend` _(netlify.toml base = "frontend"; superseded: Netlify replaced by Vercel (netlify.toml removed))_
 - [x] 2.1.4 Root README with links to frontend/backend setup
 
 ### 2.2 Local environment
@@ -317,40 +319,40 @@ Work top to bottom inside a phase unless a dependency says otherwise.
 ## Phase 3 — Database
 
 ### 3.1 Models
-- [ ] 3.1.1 Mixins: `TimestampMixin`, `SoftDeleteMixin`
-- [ ] 3.1.2 `User` (role CHECK, citext email)
-- [ ] 3.1.3 `RefreshToken`, `PasswordResetToken`
-- [ ] 3.1.4 `Address` (pincode CHECK, partial unique default)
-- [ ] 3.1.5 `Category` (self-referencing, unique slug, unique (parent, name))
-- [ ] 3.1.6 `Brand`
-- [ ] 3.1.7 `Product` (attributes, specs JSONB, status CHECK, computed `search_vector`, GIN + trigram indexes)
-- [ ] 3.1.8 `ProductVariant` (unique `upper(sku)`, price ≤ MRP CHECK, unique (product, colour, size))
-- [ ] 3.1.9 `ProductImage` (unique public_id, partial unique primary)
-- [ ] 3.1.10 `Inventory` (CHECKs on_hand ≥ 0, 0 ≤ reserved ≤ on_hand)
-- [ ] 3.1.11 `InventoryTransaction` (type CHECK, delta ≠ 0, indexes)
-- [ ] 3.1.12 `Cart`, `CartItem` (unique (cart, variant), qty CHECK)
-- [ ] 3.1.13 `Order` (status/payment_status CHECKs, money CHECKs, unique order_number, unique (user, idempotency_key), indexes)
-- [ ] 3.1.14 `OrderItem` (snapshots, `configuration` JSONB)
-- [ ] 3.1.15 `OrderStatusHistory`
-- [ ] 3.1.16 `Payment`, `PaymentEvent`, `Refund`
-- [ ] 3.1.17 `AuditLog`, `StoreSetting`
-- [ ] 3.1.18 Relationships with `lazy="raise"` defaults
+- [x] 3.1.1 Mixins: `TimestampMixin`, `SoftDeleteMixin` _(TimestampMixin, CreatedAtMixin, SoftDeleteMixin)_
+- [x] 3.1.2 `User` (role CHECK, citext email)
+- [x] 3.1.3 `RefreshToken`, `PasswordResetToken`
+- [x] 3.1.4 `Address` (pincode CHECK, partial unique default)
+- [x] 3.1.5 `Category` (self-referencing, unique slug, unique (parent, name))
+- [x] 3.1.6 `Brand`
+- [x] 3.1.7 `Product` (attributes, specs JSONB, status CHECK, computed `search_vector`, GIN + trigram indexes)
+- [x] 3.1.8 `ProductVariant` (unique `upper(sku)`, price ≤ MRP CHECK, unique (product, colour, size))
+- [x] 3.1.9 `ProductImage` (unique public_id, partial unique primary)
+- [x] 3.1.10 `Inventory` (CHECKs on_hand ≥ 0, 0 ≤ reserved ≤ on_hand)
+- [x] 3.1.11 `InventoryTransaction` (type CHECK, delta ≠ 0, indexes)
+- [x] 3.1.12 `Cart`, `CartItem` (unique (cart, variant), qty CHECK)
+- [x] 3.1.13 `Order` (status/payment_status CHECKs, money CHECKs, unique order_number, unique (user, idempotency_key), indexes)
+- [x] 3.1.14 `OrderItem` (snapshots, `configuration` JSONB)
+- [x] 3.1.15 `OrderStatusHistory`
+- [x] 3.1.16 `Payment`, `PaymentEvent`, `Refund`
+- [x] 3.1.17 `AuditLog`, `StoreSetting`
+- [x] 3.1.18 Relationships with `lazy="raise"` defaults
 
 ### 3.2 Migrations
-- [ ] 3.2.1 Autogenerate per group (identity, catalogue, inventory, cart, orders, payments, admin)
-- [ ] 3.2.2 Hand-review each: CHECKs, partial indexes, computed column, expression indexes
-- [ ] 3.2.3 Upgrade/downgrade round-trip test in CI
-- [ ] 3.2.4 Constraint tests (case-insensitive SKU, price ≤ MRP, reserved ≤ on_hand, one default address, unique slugs)
+- [x] 3.2.1 Autogenerate per group (identity, catalogue, inventory, cart, orders, payments, admin) _(7 migrations: identity, catalogue, cart, orders, inventory, payments, admin)_
+- [x] 3.2.2 Hand-review each: CHECKs, partial indexes, computed column, expression indexes _(enum CHECKs named ck_<table>_<column>, partial/expression/trigram indexes, computed search_vector reviewed)_
+- [x] 3.2.3 Upgrade/downgrade round-trip test in CI _(CI upgrade → downgrade base → upgrade; plus test that models match migrations)_
+- [x] 3.2.4 Constraint tests (case-insensitive SKU, price ≤ MRP, reserved ≤ on_hand, one default address, unique slugs) _(23 constraint tests)_
 
 ### 3.3 Seed data
-- [ ] 3.3.1 Seed categories (Eyeglasses, Sunglasses, Contact Lenses, Accessories + subcategories)
-- [ ] 3.3.2 Seed brands (Ray-Ban, …)
-- [ ] 3.3.3 Seed products/variants from the Phase-1 catalog (6 products / 11 variants)
-- [ ] 3.3.4 Seed images by listing Cloudinary `Products/` via Admin API (public_id, version, width, height)
-- [ ] 3.3.5 Seed inventory with RESTOCK transactions 👤 0.4.12 (placeholder 0 until provided)
-- [ ] 3.3.6 Seed `store_settings` defaults (shipping fee, threshold, payment window 30 min, low-stock 3)
-- [ ] 3.3.7 Seed script idempotent (`cli seed --reset` only in dev)
-- [ ] 3.3.8 ER diagram in `docs/`
+- [x] 3.3.1 Seed categories (Eyeglasses, Sunglasses, Contact Lenses, Accessories + subcategories)
+- [x] 3.3.2 Seed brands (Ray-Ban, …)
+- [x] 3.3.3 Seed products/variants from the Phase-1 catalog (6 products / 11 variants) _(7 models / 11 variants (task said 6 products; the catalogue has 7 frame models))_
+- [~] 3.3.4 Seed images by listing Cloudinary `Products/` via Admin API (public_id, version, width, height) _(images seeded from the known Products/{id}/{id}_{n} pattern (64); width/height via Cloudinary Admin API needs owner's API key)_
+- [~] 3.3.5 Seed inventory with RESTOCK transactions 👤 0.4.12 (placeholder 0 until provided) _(inventory rows created at 0; RESTOCK entries when owner provides counts (0.4.12))_
+- [x] 3.3.6 Seed `store_settings` defaults (shipping fee, threshold, payment window 30 min, low-stock 3) _(shipping fee 0 / threshold null placeholders pending owner, payment window 30, low stock 3)_
+- [x] 3.3.7 Seed script idempotent (`cli seed --reset` only in dev)
+- [x] 3.3.8 ER diagram in `docs/` _(docs/DATABASE.md generated by `cli er-diagram`)_
 - **Done when:** fresh DB → `alembic upgrade head` → `cli seed` → 6 products, 11 variants, images linked.
 
 ---
@@ -587,15 +589,15 @@ Work top to bottom inside a phase unless a dependency says otherwise.
 ## Phase 12 — Deployment & go-live
 
 - [ ] 12.1 👤 Domain purchased / DNS access
-- [ ] 12.2 Hosting accounts (Render or Railway; Netlify)
+- [ ] 12.2 👤 Owner accounts on vachanvijai@gmail.com: GitHub (repo transferred), Vercel Pro (Hobby is non-commercial), Neon via Vercel Marketplace — steps in docs/DEPLOYMENT.md
 - [ ] 12.3 Managed Postgres staging + production (same region as API), backups on
-- [ ] 12.4 API services staging + production (non-sleeping), Dockerfile or native build
-- [ ] 12.5 Pre-deploy `alembic upgrade head`; health check `/health/ready`
+- [~] 12.4 Vercel projects: vijai-opticians (frontend/) and vijai-opticians-api (backend/, Python function) _(config done: frontend/vercel.json, backend/vercel.json + api/index.py)_
+- [~] 12.5 Migrations via GitHub Actions migrate.yml (MIGRATION_DATABASE_URL secret, unpooled); health check /health/ready _(workflow written)_
 - [ ] 12.6 Environment variables per environment (§Appendix C)
-- [ ] 12.7 Netlify env vars, deploy previews, `_headers` (cache + CSP)
-- [ ] 12.8 DNS: `www` → Netlify, `api` → API host; TLS verified
+- [ ] 12.7 Vercel env vars, preview deployments, headers in vercel.json
+- [ ] 12.8 DNS: www → Vercel frontend project; API served same-origin via /api rewrite (no api subdomain)
 - [ ] 12.9 Verify refresh cookie on Safari iOS (same-site)
-- [ ] 12.10 Cron job: expire pending orders every 5 min
+- [ ] 12.10 Expire pending orders: lazy release during checkout + Vercel Cron (daily on Hobby, frequent on Pro)
 - [ ] 12.11 Sentry projects (frontend + backend), release tagging
 - [ ] 12.12 Uptime monitor on `/health/ready` with alerts to owner
 - [ ] 12.13 Weekly `pg_dump` GitHub Action to off-site storage; restore test into staging
