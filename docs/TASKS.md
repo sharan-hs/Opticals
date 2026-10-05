@@ -10,7 +10,7 @@ Companion to [ARCHITECTURE_PLAN.md](ARCHITECTURE_PLAN.md). Section references li
 
 ## Progress
 
-Last updated: 2026-10-05 21:00
+Last updated: 2026-10-05 22:13
 
 _Status: Phase 7 done (600a5e0): server cart, live pricing, stock issues, guest merge on sign-in. Backend 194 tests, frontend 32, browser run 22/22. Paused for user testing (docs/PHASE7_TESTING.md)._
 
@@ -21,7 +21,7 @@ _Status: Phase 7 done (600a5e0): server cart, live pricing, stock issues, guest 
 | Phase 2 | 26 | 4 | 31 | 84% |
 | Phase 3 | 28 | 2 | 30 | 93% |
 | Phase 4 | 32 | 0 | 32 | 100% |
-| Phase 5 | 35 | 4 | 39 | 90% |
+| Phase 5 | 37 | 2 | 39 | 95% |
 | Phase 6 | 14 | 0 | 14 | 100% |
 | Phase 7 | 13 | 0 | 13 | 100% |
 | Phase 8 | 0 | 0 | 21 | 0% |
@@ -31,9 +31,10 @@ _Status: Phase 7 done (600a5e0): server cart, live pricing, stock issues, guest 
 | Phase 12 | 0 | 2 | 21 | 0% |
 | P1 | 0 | 0 | 12 | 0% |
 | P2 | 0 | 0 | 7 | 0% |
-| **All** | **271** | **19** | **417** | **65%** |
+| **All** | **273** | **17** | **417** | **65%** |
 
 **Recently completed**
+- Cloudinary uploads live: real upload/display/delete verified
 - Photos: square crop before upload, white photo boxes on all storefront images, owner guide docs/ADDING_PHOTOS.md
 - 7.1–7.13 Server cart: live pricing, stock checks, guest merge, cart page issues + one-click fixes
 - Cart lines are now SKUs (snapshot until Phase 7 server pricing)
@@ -43,14 +44,13 @@ _Status: Phase 7 done (600a5e0): server cart, live pricing, stock issues, guest 
 - 5.2.x Admin catalogue API + Cloudinary signed uploads (keys pending)
 - 5.1.x Public catalogue API: filters, search, facets, availability, caching
 - Phase 4 accounts: API + UI; end-to-end browser run register→reload→profile→address→change password→logout→login passes
-- 4.2.1–4.2.14 Frontend auth: RTK Query reauth, guards, login/register/reset, account pages, MSW tests
 
 **Up next**
 - 👤 User testing of Phase 7 (docs/PHASE7_TESTING.md)
 - Phase 8 Checkout & orders (needs 👤 shipping fee + GST decision, 0.4.2/0.4.3)
-- 👤 Cloudinary API key/secret (unblocks 5.2.8, 5.2.9, 5.4.11, 3.3.4)
 - 👤 Open PRs; 2.5.5 enable branch protection
 - 👤 12.2 Owner accounts (GitHub transfer, Vercel Pro, Neon)
+- 👤 Rotate Cloudinary secret before go-live (it was shared in chat)
 
 ---
 
@@ -82,6 +82,8 @@ Work top to bottom inside a phase unless a dependency says otherwise.
 ---
 
 ## Phase 1 — Frontend cleanup (existing React app, static data)
+
+> ✅ Phase 7 done (600a5e0): server cart, live pricing, stock issues, guest merge on sign-in. Backend 194 tests, frontend 32, browser run 22/22. Paused for user testing (docs/PHASE7_TESTING.md).
 
 > ✅ Phase 7 done (600a5e0): server cart, live pricing, stock issues, guest merge on sign-in. Backend 194 tests, frontend 32, browser run 22/22. Paused for user testing (docs/PHASE7_TESTING.md).
 
@@ -429,8 +431,8 @@ Work top to bottom inside a phase unless a dependency says otherwise.
 - [x] 5.2.5 Inventory row auto-created with each variant
 - [x] 5.2.6 Categories: CRUD, depth ≤ 2, cycle check, deactivate cascades visibility
 - [x] 5.2.7 Brands: CRUD
-- [~] 5.2.8 Cloudinary signed-upload endpoint (folder, formats jpg/png/webp, max size) _(signature endpoint done; admin crops every photo to a square (white, JPEG ≤1600 px) before upload; tested end-to-end with Cloudinary stubbed; still needs owner's API key/secret)_
-- [~] 5.2.9 Register uploaded image (verify via Admin API), update alt/primary/variant, reorder, delete (+ Cloudinary destroy) _(register/primary/reorder/delete done; server-side asset check active once keys are set; deletes only uploads/ assets)_
+- [x] 5.2.8 Cloudinary signed-upload endpoint (folder, formats jpg/png/webp, max size) _(key 'website' (Master admin) in backend/.env; real upload verified 2026-10-05)_
+- [x] 5.2.9 Register uploaded image (verify via Admin API), update alt/primary/variant, reorder, delete (+ Cloudinary destroy) _(server checks the asset via Admin API; delete removes uploads/ assets from Cloudinary; verified live)_
 - [x] 5.2.10 Tests incl. 403 for customers on every admin route _(route sweep: every admin route 401 anonymous / 403 customer)_
 
 ### 5.3 Storefront on API
@@ -455,7 +457,7 @@ Work top to bottom inside a phase unless a dependency says otherwise.
 - [x] 5.4.8 Product editor — Specifications tab (key/value rows)
 - [x] 5.4.9 Activate/deactivate/delete with confirmation
 - [x] 5.4.10 Categories page (tree, add/edit, subcategories, deactivate)
-- [~] 5.4.11 Brands page (logo upload) _(brands page done; logo upload pending Cloudinary keys)_
+- [~] 5.4.11 Brands page (logo upload) _(brands page done; logo upload not built yet (keys now available))_
 - **Done when:** admin creates a product with 2 variants and images; it appears in the shop with working filters.
 
 ---
