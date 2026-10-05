@@ -10,13 +10,13 @@ Companion to [ARCHITECTURE_PLAN.md](ARCHITECTURE_PLAN.md). Section references li
 
 ## Progress
 
-Last updated: 2026-10-05 22:13
+Last updated: 2026-10-05 22:53
 
-_Status: Phase 7 done (600a5e0): server cart, live pricing, stock issues, guest merge on sign-in. Backend 194 tests, frontend 32, browser run 22/22. Paused for user testing (docs/PHASE7_TESTING.md)._
+_Status: Phase 8 done (2c7f40a, c0fcf06): checkout with UPI-to-shop or pay at store, orders, admin orders + settings. Backend 214 tests, frontend 35, browser run 39/39. Paused for user testing (docs/PHASE8_TESTING.md)._
 
 | Phase | Done | In progress | Total | % done |
 |---|---:|---:|---:|---:|
-| Phase 0 | 3 | 0 | 18 | 17% |
+| Phase 0 | 3 | 2 | 18 | 17% |
 | Phase 1 | 120 | 7 | 130 | 92% |
 | Phase 2 | 26 | 4 | 31 | 84% |
 | Phase 3 | 28 | 2 | 30 | 93% |
@@ -24,16 +24,17 @@ _Status: Phase 7 done (600a5e0): server cart, live pricing, stock issues, guest 
 | Phase 5 | 37 | 2 | 39 | 95% |
 | Phase 6 | 14 | 0 | 14 | 100% |
 | Phase 7 | 13 | 0 | 13 | 100% |
-| Phase 8 | 0 | 0 | 21 | 0% |
+| Phase 8 | 21 | 0 | 21 | 100% |
 | Phase 9 | 0 | 0 | 15 | 0% |
-| Phase 10 | 0 | 0 | 10 | 0% |
+| Phase 10 | 0 | 2 | 10 | 0% |
 | Phase 11 | 0 | 0 | 24 | 0% |
 | Phase 12 | 0 | 2 | 21 | 0% |
 | P1 | 0 | 0 | 12 | 0% |
 | P2 | 0 | 0 | 7 | 0% |
-| **All** | **273** | **17** | **417** | **65%** |
+| **All** | **294** | **21** | **417** | **71%** |
 
 **Recently completed**
+- 8.x Checkout & orders: UPI to shop's ID / pay at store, stock holds + expiry, admin order workflow, settings
 - Cloudinary uploads live: real upload/display/delete verified
 - Photos: square crop before upload, white photo boxes on all storefront images, owner guide docs/ADDING_PHOTOS.md
 - 7.1–7.13 Server cart: live pricing, stock checks, guest merge, cart page issues + one-click fixes
@@ -43,11 +44,11 @@ _Status: Phase 7 done (600a5e0): server cart, live pricing, stock issues, guest 
 - 5.3.x Storefront on the API: shop, product page, related, home, CloudImage, JSON-LD
 - 5.2.x Admin catalogue API + Cloudinary signed uploads (keys pending)
 - 5.1.x Public catalogue API: filters, search, facets, availability, caching
-- Phase 4 accounts: API + UI; end-to-end browser run register→reload→profile→address→change password→logout→login passes
 
 **Up next**
-- 👤 User testing of Phase 7 (docs/PHASE7_TESTING.md)
-- Phase 8 Checkout & orders (needs 👤 shipping fee + GST decision, 0.4.2/0.4.3)
+- 👤 User testing of Phase 8 (docs/PHASE8_TESTING.md)
+- 👤 Enter the owner's UPI ID in Admin → Settings
+- Phase 9 Razorpay (when the owner's account is approved) or Phase 10 Dashboard & reports
 - 👤 Open PRs; 2.5.5 enable branch protection
 - 👤 12.2 Owner accounts (GitHub transfer, Vercel Pro, Neon)
 - 👤 Rotate Cloudinary secret before go-live (it was shared in chat)
@@ -63,10 +64,10 @@ Work top to bottom inside a phase unless a dependency says otherwise.
 - [x] 0.1 Audit existing codebase (code read, build, headless Chrome at 4 viewports, Cloudinary probe)
 - [x] 0.2 Write architecture plan (`docs/ARCHITECTURE_PLAN.md`)
 - [x] 0.3 Write this task breakdown
-- [ ] 0.4 👤 Owner answers (feed results back into the plan):
+- [ ] 0.4 👤 Owner answers (feed results back into the plan): _(2026-10-05: payment for now = UPI to the shop's own UPI ID or pay at store; UPI ID still a placeholder until the owner's ID is entered in Admin → Settings)_
   - [ ] 0.4.1 Online stock: separate pool or shared with the two shops? Who updates it?
-  - [ ] 0.4.2 Shipping: fee, free-shipping threshold (site claims ₹15,000), delivery regions, courier
-  - [ ] 0.4.3 GST: GSTIN, legal entity name, HSN codes and rates per category (confirm with CA), invoice needs
+  - [~] 0.4.2 Shipping: fee, free-shipping threshold (site claims ₹15,000), delivery regions, courier _(2026-10-05: delivery is free; regions/courier still open)_
+  - [~] 0.4.3 GST: GSTIN, legal entity name, HSN codes and rates per category (confirm with CA), invoice needs _(2026-10-05: prices include GST; GSTIN, entity name, HSN codes still open)_
   - [ ] 0.4.4 Return / refund / cancellation policy and windows (site claims 30-day money back)
   - [ ] 0.4.5 Cash on delivery: yes/no
   - [ ] 0.4.6 Launch catalogue: only current Ray-Ban sunglasses, or also frames, lenses, accessories? Who photographs/uploads?
@@ -82,6 +83,8 @@ Work top to bottom inside a phase unless a dependency says otherwise.
 ---
 
 ## Phase 1 — Frontend cleanup (existing React app, static data)
+
+> ✅ Phase 8 done (2c7f40a, c0fcf06): checkout with UPI-to-shop or pay at store, orders, admin orders + settings. Backend 214 tests, frontend 35, browser run 39/39. Paused for user testing (docs/PHASE8_TESTING.md).
 
 > ✅ Phase 7 done (600a5e0): server cart, live pricing, stock issues, guest merge on sign-in. Backend 194 tests, frontend 32, browser run 22/22. Paused for user testing (docs/PHASE7_TESTING.md).
 
@@ -504,29 +507,29 @@ Work top to bottom inside a phase unless a dependency says otherwise.
 ## Phase 8 — Checkout & orders
 
 ### 8.1 Backend
-- [ ] 8.1.1 Pricing service: subtotal, discount (0 for now), shipping from settings, GST-inclusive tax split 👤 0.4.2/0.4.3
-- [ ] 8.1.2 `POST /checkout/quote`
-- [ ] 8.1.3 Order number generator (DB sequence, `VO-YYMMDD-NNNN`)
-- [ ] 8.1.4 Order state machine (allowed transitions, who may trigger) + history writer
-- [ ] 8.1.5 `POST /orders`: idempotency key, lock inventory in variant order, reserve, snapshot prices/address, `expires_at`
-- [ ] 8.1.6 `GET /orders`, `GET /orders/{order_number}`, `POST /orders/{n}/cancel`
-- [ ] 8.1.7 FakeProvider payment for dev/tests ("simulate success/failure")
-- [ ] 8.1.8 `mark_order_paid` (idempotent): commit sale, CONFIRMED, clear cart, email
-- [ ] 8.1.9 Expiry job (`cli expire-pending-orders`, `FOR UPDATE SKIP LOCKED`)
-- [ ] 8.1.10 Admin orders: list/search/filter, detail, status change (+ tracking fields), cancel (+ restock)
-- [ ] 8.1.11 Order emails: placed, confirmed, shipped (with tracking), delivered, cancelled
-- [ ] 8.1.12 Tests: totals, idempotent replay, **concurrent last-unit order**, expiry release, illegal transitions 409, ownership 404
+- [x] 8.1.1 Pricing service: subtotal, discount (0 for now), shipping from settings, GST-inclusive tax split 👤 0.4.2/0.4.3 _(delivery fee setting (0 = free), GST-inclusive tax stored per order (rate in settings))_
+- [x] 8.1.2 `POST /checkout/quote`
+- [x] 8.1.3 Order number generator (DB sequence, `VO-YYMMDD-NNNN`)
+- [x] 8.1.4 Order state machine (allowed transitions, who may trigger) + history writer
+- [x] 8.1.5 `POST /orders`: idempotency key, lock inventory in variant order, reserve, snapshot prices/address, `expires_at`
+- [x] 8.1.6 `GET /orders`, `GET /orders/{order_number}`, `POST /orders/{n}/cancel`
+- [x] 8.1.7 FakeProvider payment for dev/tests ("simulate success/failure") _(replaced by manual payments: UPI to shop's ID (customer reports reference, staff confirm) and pay at store; FakeProvider not needed)_
+- [x] 8.1.8 `mark_order_paid` (idempotent): commit sale, CONFIRMED, clear cart, email
+- [x] 8.1.9 Expiry job (`cli expire-pending-orders`, `FOR UPDATE SKIP LOCKED`) _(lazy expiry + `cli expire-orders` + Vercel Cron GET /internal/expire-orders (CRON_SECRET))_
+- [x] 8.1.10 Admin orders: list/search/filter, detail, status change (+ tracking fields), cancel (+ restock)
+- [x] 8.1.11 Order emails: placed, confirmed, shipped (with tracking), delivered, cancelled
+- [x] 8.1.12 Tests: totals, idempotent replay, **concurrent last-unit order**, expiry release, illegal transitions 409, ownership 404
 
 ### 8.2 Frontend
-- [ ] 8.2.1 Checkout route (auth required), address select / inline add
-- [ ] 8.2.2 Order summary from quote; price/stock change warnings
-- [ ] 8.2.3 Place order with idempotency key; disable double submit
-- [ ] 8.2.4 Payment step (FakeProvider in dev)
-- [ ] 8.2.5 Order confirmation page
-- [ ] 8.2.6 Account → Orders list + Order detail (timeline, tracking, cancel)
-- [ ] 8.2.7 Admin → Orders list (filters: status, payment, date, search)
-- [ ] 8.2.8 Admin → Order detail (items, customer, address, payments, timeline, actions, tracking entry, cancel with confirm)
-- [ ] 8.2.9 Remove legacy checkout/confirmation markup not reused
+- [x] 8.2.1 Checkout route (auth required), address select / inline add
+- [x] 8.2.2 Order summary from quote; price/stock change warnings
+- [x] 8.2.3 Place order with idempotency key; disable double submit
+- [x] 8.2.4 Payment step (FakeProvider in dev) _(UPI QR + upi:// link + 'I've paid' reference; pickup instructions)_
+- [x] 8.2.5 Order confirmation page
+- [x] 8.2.6 Account → Orders list + Order detail (timeline, tracking, cancel)
+- [x] 8.2.7 Admin → Orders list (filters: status, payment, date, search)
+- [x] 8.2.8 Admin → Order detail (items, customer, address, payments, timeline, actions, tracking entry, cancel with confirm)
+- [x] 8.2.9 Remove legacy checkout/confirmation markup not reused _(old placeholder checkout CSS removed)_
 - **Done when:** full purchase works end-to-end with the FakeProvider and stock moves correctly.
 
 ---
@@ -558,12 +561,12 @@ Work top to bottom inside a phase unless a dependency says otherwise.
 - [ ] 10.2 `GET /admin/dashboard/revenue-trend`
 - [ ] 10.3 Customers: list, detail (orders, lifetime value), activate/deactivate
 - [ ] 10.4 Reports: sales by day/month/product/category/brand
-- [ ] 10.5 Settings: get/update (shipping, threshold, payment window, store contact)
+- [~] 10.5 Settings: get/update (shipping, threshold, payment window, store contact) _(payments/delivery/order email done in Phase 8; store list editing and contact details pending)_
 - [ ] 10.6 Tests for aggregates (timezone edges)
 - [ ] 10.7 Dashboard UI: KPI cards, revenue chart, recent orders, low-stock list
 - [ ] 10.8 Customers UI
 - [ ] 10.9 Reports UI (date range, grouping)
-- [ ] 10.10 Settings UI
+- [~] 10.10 Settings UI _(payments/delivery/order email done in Phase 8; store list editing and contact details pending)_
 - **Done when:** owner can run daily operations without a developer.
 
 ---
