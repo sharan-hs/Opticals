@@ -10,7 +10,7 @@ Companion to [ARCHITECTURE_PLAN.md](ARCHITECTURE_PLAN.md). Section references li
 
 ## Progress
 
-Last updated: 2026-10-05 20:46
+Last updated: 2026-10-05 21:00
 
 _Status: Phase 7 done (600a5e0): server cart, live pricing, stock issues, guest merge on sign-in. Backend 194 tests, frontend 32, browser run 22/22. Paused for user testing (docs/PHASE7_TESTING.md)._
 
@@ -34,6 +34,7 @@ _Status: Phase 7 done (600a5e0): server cart, live pricing, stock issues, guest 
 | **All** | **271** | **19** | **417** | **65%** |
 
 **Recently completed**
+- Photos: square crop before upload, white photo boxes on all storefront images, owner guide docs/ADDING_PHOTOS.md
 - 7.1–7.13 Server cart: live pricing, stock checks, guest merge, cart page issues + one-click fixes
 - Cart lines are now SKUs (snapshot until Phase 7 server pricing)
 - 6.1–6.14 Inventory: locked ledger, admin stock grid, adjust dialog, history, transactions log
@@ -43,7 +44,6 @@ _Status: Phase 7 done (600a5e0): server cart, live pricing, stock issues, guest 
 - 5.1.x Public catalogue API: filters, search, facets, availability, caching
 - Phase 4 accounts: API + UI; end-to-end browser run register→reload→profile→address→change password→logout→login passes
 - 4.2.1–4.2.14 Frontend auth: RTK Query reauth, guards, login/register/reset, account pages, MSW tests
-- 4.1.1–4.1.18 Backend auth: Argon2, JWT, refresh rotation, addresses, email, rate limits, create-admin
 
 **Up next**
 - 👤 User testing of Phase 7 (docs/PHASE7_TESTING.md)
@@ -82,6 +82,8 @@ Work top to bottom inside a phase unless a dependency says otherwise.
 ---
 
 ## Phase 1 — Frontend cleanup (existing React app, static data)
+
+> ✅ Phase 7 done (600a5e0): server cart, live pricing, stock issues, guest merge on sign-in. Backend 194 tests, frontend 32, browser run 22/22. Paused for user testing (docs/PHASE7_TESTING.md).
 
 > ✅ Phase 7 done (600a5e0): server cart, live pricing, stock issues, guest merge on sign-in. Backend 194 tests, frontend 32, browser run 22/22. Paused for user testing (docs/PHASE7_TESTING.md).
 
@@ -427,7 +429,7 @@ Work top to bottom inside a phase unless a dependency says otherwise.
 - [x] 5.2.5 Inventory row auto-created with each variant
 - [x] 5.2.6 Categories: CRUD, depth ≤ 2, cycle check, deactivate cascades visibility
 - [x] 5.2.7 Brands: CRUD
-- [~] 5.2.8 Cloudinary signed-upload endpoint (folder, formats jpg/png/webp, max size) _(signature endpoint done; needs owner's Cloudinary API key/secret to use)_
+- [~] 5.2.8 Cloudinary signed-upload endpoint (folder, formats jpg/png/webp, max size) _(signature endpoint done; admin crops every photo to a square (white, JPEG ≤1600 px) before upload; tested end-to-end with Cloudinary stubbed; still needs owner's API key/secret)_
 - [~] 5.2.9 Register uploaded image (verify via Admin API), update alt/primary/variant, reorder, delete (+ Cloudinary destroy) _(register/primary/reorder/delete done; server-side asset check active once keys are set; deletes only uploads/ assets)_
 - [x] 5.2.10 Tests incl. 403 for customers on every admin route _(route sweep: every admin route 401 anonymous / 403 customer)_
 
