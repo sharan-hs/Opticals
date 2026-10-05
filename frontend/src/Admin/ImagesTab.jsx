@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 
 import { ConfirmDialog } from "./components";
+import PhotoCropDialog from "./PhotoCropDialog";
 import { apiErrorCode, errorMessage } from "../Api/errors";
 import {
   useAddImageMutation,
@@ -106,6 +107,8 @@ const ImagesTab = ({ product }) => {
   const [addImage] = useAddImageMutation();
   const [reorder] = useReorderImagesMutation();
   const [variantId, setVariantId] = useState(product.variants[0]?.id ?? null);
+  const [queue, setQueue] = useState([]); // photos picked, waiting to be positioned
+  const [position, setPosition] = useState(0);
   const [progress, setProgress] = useState(null);
   const [uploadsDisabled, setUploadsDisabled] = useState(false);
   const [publicId, setPublicId] = useState("");
@@ -117,29 +120,38 @@ const ImagesTab = ({ product }) => {
       .catch((err) => apiErrorCode(err) === "IMAGES_NOT_CONFIGURED" && setUploadsDisabled(true));
   }, [getSignature, product.id]);
 
-  const upload = async (files) => {
-    let signed;
+  const pick = (files) => {
+    const photos = [...files].filter((file) => file.type.startsWith("image/"));
+    if (photos.length < files.length) notify.error("Only photos can be added.");
+    setQueue(photos);
+    setPosition(0);
+  };
+
+  const next = () => {
+    if (position + 1 < queue.length) setPosition(position + 1);
+    else setQueue([]);
+  };
+
+  // Uploads one positioned square straight to Cloudinary, then registers it.
+  const save = async (blob) => {
+    const file = queue[position];
+    setProgress(0);
     try {
-      signed = await getSignature(product.id).unwrap();
+      const signed = await getSignature(product.id).unwrap();
+      const name = file.name.replace(/\.[^.]+$/, "") + ".jpg";
+      const result = await uploadToCloudinary(new File([blob], name, { type: "image/jpeg" }), signed, setProgress);
+      await addImage({ productId: product.id, public_id: result.public_id, variant_id: variantId }).unwrap();
+      notify.success("Photo saved");
+      next();
     } catch (err) {
-      if (apiErrorCode(err) === "IMAGES_NOT_CONFIGURED") setUploadsDisabled(true);
-      notify.error(errorMessage(err));
-      return;
-    }
-    for (const [n, file] of [...files].entries()) {
-      if (file.size > signed.max_bytes) {
-        notify.error(`${file.name} is larger than 10 MB`);
-        continue;
+      if (apiErrorCode(err) === "IMAGES_NOT_CONFIGURED") {
+        setUploadsDisabled(true);
+        setQueue([]);
       }
-      try {
-        const result = await uploadToCloudinary(file, signed, (p) => setProgress({ n: n + 1, total: files.length, p }));
-        await addImage({ productId: product.id, public_id: result.public_id, variant_id: variantId }).unwrap();
-      } catch (err) {
-        notify.error(`${file.name}: ${err.message?.slice(0, 120) || errorMessage(err)}`);
-      }
+      notify.error(err?.data ? errorMessage(err) : `Upload failed: ${err.message?.slice(0, 120)}`);
+    } finally {
+      setProgress(null);
     }
-    setProgress(null);
-    notify.success("Upload finished");
   };
 
   const attachExisting = async (event) => {
@@ -171,43 +183,68 @@ const ImagesTab = ({ product }) => {
         </div>
         {uploadsDisabled ? (
           <p className="adminNotice">
-            Uploading needs the shop’s Cloudinary API key and secret in the backend settings
-            (CLOUDINARY_API_KEY / CLOUDINARY_API_SECRET). Until then, add photos that are already in
-            Cloudinary by their public ID below.
+            Photo uploads aren’t switched on yet: the website needs the shop’s Cloudinary API key and
+            secret (CLOUDINARY_API_KEY / CLOUDINARY_API_SECRET in the backend settings).
           </p>
         ) : (
-          <label className="adminField">
-            Upload JPG, PNG or WebP (up to 10 MB each)
-            <input
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              multiple
-              disabled={progress !== null}
-              onChange={(e) => e.target.files.length && upload(e.target.files)}
-            />
-          </label>
+          <>
+            <label className="adminButton adminUploadButton">
+              Choose photos…
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                className="visuallyHidden"
+                disabled={queue.length > 0}
+                onChange={(e) => {
+                  if (e.target.files.length) pick(e.target.files);
+                  e.target.value = "";
+                }}
+              />
+            </label>
+            <ul className="adminTips">
+              <li>Any photo works: from the phone camera, gallery or computer. Each one is made square.</li>
+              <li>Before saving you see exactly how it will look, and can zoom and move it.</li>
+              <li>Best results: plain white background, good daylight, whole frame in view, one pair per photo.</li>
+              <li>The first photo is the main one in the shop. You can change it and the order below.</li>
+            </ul>
+          </>
         )}
-        {progress && (
+        <details className="adminAdvanced">
+          <summary>Advanced: add a photo already in Cloudinary</summary>
+          <form className="adminToolbar" style={{ marginTop: 10 }} onSubmit={attachExisting}>
+            <label className="visuallyHidden" htmlFor="existing-public-id">
+              Cloudinary public ID
+            </label>
+            <input
+              id="existing-public-id"
+              type="text"
+              placeholder="Existing Cloudinary public ID, e.g. Products/orb2132/orb2132_1"
+              value={publicId}
+              onChange={(e) => setPublicId(e.target.value)}
+              style={{ minWidth: 380 }}
+            />
+            <button type="submit" className="adminButton secondary" disabled={!publicId.trim()}>
+              Add by ID
+            </button>
+          </form>
+        </details>
+        {queue.length > 0 && (
+          <PhotoCropDialog
+            file={queue[position]}
+            position={position + 1}
+            total={queue.length}
+            busy={progress !== null}
+            onSave={save}
+            onSkip={next}
+            onCancel={() => setQueue([])}
+          />
+        )}
+        {progress !== null && (
           <p role="status" className="muted">
-            Uploading {progress.n} of {progress.total}… {Math.round(progress.p * 100)}%
+            Uploading… {Math.round(progress * 100)}%
           </p>
         )}
-        <form className="adminToolbar" style={{ marginTop: 14 }} onSubmit={attachExisting}>
-          <label className="visuallyHidden" htmlFor="existing-public-id">
-            Cloudinary public ID
-          </label>
-          <input
-            id="existing-public-id"
-            type="text"
-            placeholder="Existing Cloudinary public ID, e.g. Products/orb2132/orb2132_1"
-            value={publicId}
-            onChange={(e) => setPublicId(e.target.value)}
-            style={{ minWidth: 380 }}
-          />
-          <button type="submit" className="adminButton secondary" disabled={!publicId.trim()}>
-            Add by ID
-          </button>
-        </form>
       </section>
 
       {product.images.length === 0 ? (

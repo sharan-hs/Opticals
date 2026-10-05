@@ -36,6 +36,7 @@
   width: 80px;
   height: 80px;
   object-fit: contain;
+  background-color: #fff;
 }
 
 .productFullImg {
@@ -48,7 +49,8 @@
   height: 520px;
   object-fit: contain;
   pointer-events: none;
-  background-color: #eff0f1;
+  background-color: #fff;
+  border: 1px solid #ececec;
 }
 
 .buttonsGroup {
