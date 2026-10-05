@@ -529,13 +529,13 @@ Auth column: Public / Customer (any logged-in user) / Admin (`role=ADMIN`; futur
 ### Cart
 | Method & URL | Auth | Request → Response | Validation / errors |
 |---|---|---|---|
-| GET `/cart` | Customer | → `Cart {items[{id, variant, product, quantity, unit_price, line_total, available, issue?: OUT_OF_STOCK\|PRICE_CHANGED\|INACTIVE}], subtotal, item_count}` | prices always live |
-| POST `/cart/items` | Customer | `{variant_id, quantity}` → Cart | 404 variant; 409 insufficient stock; qty 1–10; merges with existing line |
-| PATCH `/cart/items/{item_id}` | Customer (owner) | `{quantity}` → Cart | same |
-| DELETE `/cart/items/{item_id}` | Customer (owner) | → Cart | |
+| GET `/cart` | Customer | → `Cart {lines[{variant_id, sku, color_name, product_slug, product_name, image, quantity, unit_price_paise, mrp_paise, line_total_paise, max_quantity, issue?: INACTIVE\|OUT_OF_STOCK\|INSUFFICIENT_STOCK}], item_count, subtotal_paise, savings_paise, has_issues}` | prices always live; subtotal counts only lines without an issue; `Cache-Control: no-store` |
+| POST `/cart/items` | Customer | `{variant_id, quantity}` → Cart | 404 not sold; 409 `OUT_OF_STOCK`/`INSUFFICIENT_STOCK` (`details.max_quantity`), `QUANTITY_LIMIT` (10 per colour), `CART_FULL` (30 lines); merges with the existing line |
+| PATCH `/cart/items/{variant_id}` | Customer | `{quantity}` → Cart | lowering always allowed; raising needs stock; 404 if not in the cart |
+| DELETE `/cart/items/{variant_id}` | Customer | → Cart | idempotent |
 | DELETE `/cart` | Customer | → 204 | |
-| POST `/cart/merge` | Customer | `{items:[{variant_id, quantity}]}` (guest cart) → Cart | clamps to stock; called right after login |
-| POST `/cart/preview` | Public | `{items:[{variant_id, quantity}]}` → priced Cart | lets guests see real prices without a server cart |
+| POST `/cart/merge` | Customer | `{items:[{variant_id, quantity}]}` (guest cart, ≤ 50) → `Cart + adjusted_variant_ids` | sums, then clamps to 10 and to stock; drops colours no longer sold; keeps out-of-stock ones (shown as such); called right after sign-in |
+| POST `/cart/preview` | Public | `{items:[{variant_id, quantity}]}` → priced Cart | lets guests see real prices without a server cart; unknown ids and never-published products are left out |
 
 ### Checkout & orders (customer)
 | Method & URL | Auth | Request → Response | Validation / errors |

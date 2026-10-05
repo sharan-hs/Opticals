@@ -28,6 +28,8 @@ STATIC_CDN_CACHE = "public, max-age=300, stale-while-revalidate=600"
 def _cache(response: Response, cdn_policy: str = PUBLIC_CDN_CACHE) -> None:
     response.headers["Cache-Control"] = BROWSER_CACHE
     response.headers["CDN-Cache-Control"] = cdn_policy
+
+
 MAX_STOREFRONT_PAGE = 48
 
 

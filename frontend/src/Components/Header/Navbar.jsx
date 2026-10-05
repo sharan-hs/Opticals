@@ -10,7 +10,7 @@ import { FaRegUser } from "react-icons/fa6";
 import { MdOutlineClose } from "react-icons/md";
 
 import logo2 from "../../Assets/logo2.png";
-import { selectCartCount } from "../../Features/Cart/cartSlice";
+import { useCartCount } from "../../Features/Cart/useCart";
 import { selectAuthStatus, selectCurrentUser } from "../../Features/Auth/authSlice";
 import { useSignOut } from "../../Features/Auth/useSignOut";
 
@@ -127,7 +127,7 @@ const AccountMenu = () => {
 };
 
 const Navbar = () => {
-  const cartCount = useSelector(selectCartCount);
+  const cartCount = useCartCount();
   const isAuthenticated = useSelector(selectAuthStatus) === "authenticated";
   const [signOut] = useSignOut();
   const location = useLocation();

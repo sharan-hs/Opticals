@@ -6,7 +6,7 @@ import { GoChevronLeft, GoChevronRight } from "react-icons/go";
 
 import { AVAILABILITY_LABELS } from "../../../Features/Catalog/colors";
 import { MAX_QUANTITY } from "../../../Features/Cart/cartSlice";
-import { cartLineFor, useAddToCart } from "../../../Features/Cart/useAddToCart";
+import { useCart } from "../../../Features/Cart/useCart";
 import { cloudinarySrcSet, imageUrl } from "../../../Utils/cloudinary";
 import { formatPaise } from "../../../Utils/format";
 
@@ -14,7 +14,8 @@ import "./Product.css";
 
 // `product` is ProductDetail from the API; `variant` the selected colour.
 const Product = ({ product, variant, onSelectVariant }) => {
-  const addToCart = useAddToCart();
+  const { add } = useCart();
+  const [adding, setAdding] = useState(false);
   const [currentImg, setCurrentImg] = useState(0);
   const [quantity, setQuantity] = useState(1);
 
@@ -181,10 +182,12 @@ const Product = ({ product, variant, onSelectVariant }) => {
             <div className="productCartBtn">
               <button
                 type="button"
-                disabled={soldOut}
-                onClick={() =>
-                  addToCart(cartLineFor(product, { ...variant, image: variant.images[0] ?? product.images[0] }), quantity)
-                }
+                disabled={soldOut || adding}
+                onClick={async () => {
+                  setAdding(true);
+                  await add(variant.id, quantity);
+                  setAdding(false);
+                }}
               >
                 {soldOut ? "Out of stock" : "Add to Cart"}
               </button>

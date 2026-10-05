@@ -1,67 +1,54 @@
 import { configureStore } from "@reduxjs/toolkit";
 import cartReducer, {
-  addToCart,
-  clearCart,
+  guestCartCleared,
+  guestItemAdded,
+  guestItemRemoved,
+  guestItemsKept,
+  guestQuantitySet,
   MAX_QUANTITY,
-  removeFromCart,
-  selectCartCount,
-  selectCartLines,
-  selectCartSubtotalPaise,
-  updateQuantity,
+  selectGuestCount,
 } from "./cartSlice";
 
 const makeStore = () => configureStore({ reducer: { cart: cartReducer } });
+const items = (store) => store.getState().cart.items;
 
-const HAVANA = {
-  sku: "ORB4349-HAVANA",
-  slug: "ray-ban-rb4349",
-  name: "Ray-Ban RB4349",
-  colorName: "Havana",
-  pricePaise: 719000,
-  image: { public_id: "Products/orb4349_havana/orb4349_havana_1", version: 1775294749 },
-};
-const BLACK = { ...HAVANA, sku: "ORB2132", slug: "ray-ban-new-wayfarer-rb2132", pricePaise: 1249000 };
-
-describe("cart slice", () => {
-  test("adds a colour with the requested quantity", () => {
+describe("guest cart slice", () => {
+  test("adds a colour and merges repeat adds", () => {
     const store = makeStore();
-    store.dispatch(addToCart({ ...HAVANA, quantity: 3 }));
-    expect(store.getState().cart.items).toEqual([{ ...HAVANA, quantity: 3 }]);
-  });
-
-  test("adding the same colour again merges quantities and refreshes the snapshot", () => {
-    const store = makeStore();
-    store.dispatch(addToCart(HAVANA));
-    store.dispatch(addToCart({ ...HAVANA, pricePaise: 699000, quantity: 2 }));
-    expect(store.getState().cart.items).toEqual([{ ...HAVANA, pricePaise: 699000, quantity: 3 }]);
+    store.dispatch(guestItemAdded({ variant_id: 7, quantity: 3 }));
+    store.dispatch(guestItemAdded({ variant_id: 7 }));
+    store.dispatch(guestItemAdded({ variant_id: 9, quantity: 2 }));
+    expect(items(store)).toEqual([
+      { variant_id: 7, quantity: 4 },
+      { variant_id: 9, quantity: 2 },
+    ]);
+    expect(selectGuestCount(store.getState())).toBe(6);
   });
 
   test("caps quantity at the per-item limit", () => {
     const store = makeStore();
-    store.dispatch(addToCart({ ...HAVANA, quantity: 25 }));
-    expect(store.getState().cart.items[0].quantity).toBe(MAX_QUANTITY);
+    store.dispatch(guestItemAdded({ variant_id: 7, quantity: 25 }));
+    expect(items(store)[0].quantity).toBe(MAX_QUANTITY);
   });
 
-  test("updates, ignores invalid quantities and removes", () => {
+  test("sets quantities, ignoring invalid ones, and removes", () => {
     const store = makeStore();
-    store.dispatch(addToCart(HAVANA));
-    store.dispatch(updateQuantity({ sku: HAVANA.sku, quantity: 4 }));
-    store.dispatch(updateQuantity({ sku: HAVANA.sku, quantity: NaN }));
-    store.dispatch(updateQuantity({ sku: HAVANA.sku, quantity: 0 }));
-    expect(store.getState().cart.items[0].quantity).toBe(1);
-    store.dispatch(removeFromCart(HAVANA.sku));
-    expect(store.getState().cart.items).toEqual([]);
+    store.dispatch(guestItemAdded({ variant_id: 7 }));
+    store.dispatch(guestQuantitySet({ variant_id: 7, quantity: 4 }));
+    store.dispatch(guestQuantitySet({ variant_id: 7, quantity: NaN }));
+    expect(items(store)[0].quantity).toBe(4);
+    store.dispatch(guestQuantitySet({ variant_id: 7, quantity: 0 }));
+    expect(items(store)[0].quantity).toBe(1);
+    store.dispatch(guestItemRemoved(7));
+    expect(items(store)).toEqual([]);
   });
 
-  test("totals are computed in paise", () => {
+  test("keeps only colours the API still knows, and clears", () => {
     const store = makeStore();
-    store.dispatch(addToCart({ ...HAVANA, quantity: 2 }));
-    store.dispatch(addToCart(BLACK));
-    const state = store.getState();
-    expect(selectCartCount(state)).toBe(3);
-    expect(selectCartSubtotalPaise(state)).toBe(2 * 719000 + 1249000);
-    expect(selectCartLines(state)[0].lineTotalPaise).toBe(1438000);
-    store.dispatch(clearCart());
-    expect(selectCartCount(store.getState())).toBe(0);
+    [1, 2, 3].forEach((id) => store.dispatch(guestItemAdded({ variant_id: id })));
+    store.dispatch(guestItemsKept([1, 3]));
+    expect(items(store).map((item) => item.variant_id)).toEqual([1, 3]);
+    store.dispatch(guestCartCleared());
+    expect(items(store)).toEqual([]);
   });
 });

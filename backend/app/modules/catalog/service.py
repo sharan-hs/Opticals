@@ -45,7 +45,7 @@ def _sorted_images(images: list[ProductImage]) -> list[ProductImage]:
     return sorted(images, key=lambda i: (not i.is_primary, i.sort_order, i.id))
 
 
-def _primary_image(product: Product, variants: list[ProductVariant]) -> ProductImage | None:
+def primary_image(product: Product, variants: list[ProductVariant]) -> ProductImage | None:
     for variant in variants:
         if variant.images:
             return _sorted_images(variant.images)[0]
@@ -56,7 +56,7 @@ def _primary_image(product: Product, variants: list[ProductVariant]) -> ProductI
 def to_card(product: Product) -> ProductCard:
     variants = _active_variants(product)
     cheapest = min(variants, key=lambda v: (v.price_paise, v.sort_order))
-    image = _primary_image(product, variants)
+    image = primary_image(product, variants)
     return ProductCard(
         id=product.id,
         slug=product.slug,
@@ -68,7 +68,10 @@ def to_card(product: Product) -> ProductCard:
         mrp_paise=cheapest.mrp_paise,
         discount_pct=discount_pct(cheapest.mrp_paise, cheapest.price_paise),
         image=ImageOut.model_validate(image) if image else None,
-        colors=[ColorSwatch(name=v.color_name, hex=v.color_hex, sku=v.sku) for v in variants],
+        colors=[
+            ColorSwatch(variant_id=v.id, name=v.color_name, hex=v.color_hex, sku=v.sku)
+            for v in variants
+        ],
         availability=best([_availability(v) for v in variants]),
     )
 

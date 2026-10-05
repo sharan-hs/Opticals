@@ -2,13 +2,13 @@ import { createSelector, createSlice } from "@reduxjs/toolkit";
 
 export const MAX_QUANTITY = 10;
 
-const clampQuantity = (quantity) =>
-  Math.min(MAX_QUANTITY, Math.max(1, Math.floor(quantity)));
+const clampQuantity = (quantity) => Math.min(MAX_QUANTITY, Math.max(1, Math.floor(quantity)));
 
-// One line per colour (SKU). Name, colour, price and image are a snapshot
-// taken when the item was added, for display only: the server prices the cart
-// at checkout (Phase 7/8), so a stale snapshot can never be charged.
-//   { sku, quantity, slug, name, colorName, pricePaise, image: {public_id, version} | null }
+// The guest cart: what a shopper picked before signing in, saved in this
+// browser. Only colour ids and quantities; names, photos and prices come from
+// the API (POST /cart/preview), so nothing here can be stale or tampered with.
+// Once the shopper signs in it's merged into their server cart and emptied.
+//   items: [{ variant_id, quantity }]
 const initialState = {
   items: [],
 };
@@ -17,46 +17,45 @@ const cartSlice = createSlice({
   name: "cart",
   initialState,
   reducers: {
-    addToCart(state, action) {
-      const { quantity = 1, ...line } = action.payload;
-      const existing = state.items.find((item) => item.sku === line.sku);
+    guestItemAdded(state, action) {
+      const { variant_id, quantity = 1 } = action.payload;
+      const existing = state.items.find((item) => item.variant_id === variant_id);
       if (existing) {
-        Object.assign(existing, line); // refresh the snapshot
         existing.quantity = clampQuantity(existing.quantity + quantity);
       } else {
-        state.items.push({ ...line, quantity: clampQuantity(quantity) });
+        state.items.push({ variant_id, quantity: clampQuantity(quantity) });
       }
     },
-    updateQuantity(state, action) {
-      const { sku, quantity } = action.payload;
-      const item = state.items.find((line) => line.sku === sku);
+    guestQuantitySet(state, action) {
+      const { variant_id, quantity } = action.payload;
+      const item = state.items.find((line) => line.variant_id === variant_id);
       if (item && Number.isFinite(quantity)) {
         item.quantity = clampQuantity(quantity);
       }
     },
-    removeFromCart(state, action) {
-      state.items = state.items.filter((item) => item.sku !== action.payload);
+    guestItemRemoved(state, action) {
+      state.items = state.items.filter((item) => item.variant_id !== action.payload);
     },
-    clearCart(state) {
+    // Drops colours the API no longer knows about.
+    guestItemsKept(state, action) {
+      const known = new Set(action.payload);
+      if (state.items.some((item) => !known.has(item.variant_id))) {
+        state.items = state.items.filter((item) => known.has(item.variant_id));
+      }
+    },
+    guestCartCleared(state) {
       state.items = [];
     },
   },
 });
 
-export const { addToCart, removeFromCart, updateQuantity, clearCart } = cartSlice.actions;
+export const { guestItemAdded, guestQuantitySet, guestItemRemoved, guestItemsKept, guestCartCleared } =
+  cartSlice.actions;
 
-export const selectCartItems = (state) => state.cart.items;
+export const selectGuestItems = (state) => state.cart.items;
 
-export const selectCartLines = createSelector([selectCartItems], (items) =>
-  items.map((item) => ({ ...item, lineTotalPaise: item.pricePaise * item.quantity }))
-);
-
-export const selectCartCount = createSelector([selectCartItems], (items) =>
+export const selectGuestCount = createSelector([selectGuestItems], (items) =>
   items.reduce((count, item) => count + item.quantity, 0)
-);
-
-export const selectCartSubtotalPaise = createSelector([selectCartLines], (lines) =>
-  lines.reduce((total, line) => total + line.lineTotalPaise, 0)
 );
 
 export default cartSlice.reducer;

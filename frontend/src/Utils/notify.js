@@ -15,4 +15,10 @@ export const notify = {
       style: { backgroundColor: "#ff4b4b", color: "white" },
       iconTheme: { primary: "#fff", secondary: "#ff4b4b" },
     }),
+  // Something changed that the shopper should know about, but nothing failed.
+  info: (message) =>
+    toast(message, {
+      duration: 4000,
+      style: { backgroundColor: "#333", color: "white" },
+    }),
 };

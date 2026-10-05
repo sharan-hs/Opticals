@@ -1091,3 +1091,45 @@
     padding: 0 5px;
   }
 }
+
+/* Live cart (Phase 7): stock problems and savings */
+.cartLineHasIssue {
+  background-color: #fff8f6;
+}
+
+.cartLineIssue {
+  margin-top: 6px;
+  font-size: 15px;
+  color: #b3261e;
+}
+
+.cartLineFix {
+  border: none;
+  background: none;
+  padding: 0;
+  font: inherit;
+  color: #000;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.cartLineMrp {
+  display: block;
+  font-size: 14px;
+  color: #767676;
+}
+
+.cartSavings {
+  color: #1b7f3b;
+  font-weight: 500;
+}
+
+.cartStatus {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 40px 0;
+  font-size: 17px;
+}

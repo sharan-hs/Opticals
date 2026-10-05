@@ -4,7 +4,7 @@ import { FaCartPlus } from "react-icons/fa";
 
 import CloudImage from "../CloudImage/CloudImage";
 import { formatPaise } from "../../Utils/format";
-import { cartLineFor, useAddToCart } from "../../Features/Cart/useAddToCart";
+import { useCart } from "../../Features/Cart/useCart";
 
 import "./ProductCard.css";
 
@@ -14,7 +14,7 @@ const IMAGE_SIZES = "(max-width: 991px) 50vw, 25vw";
 // The quick "Add to Cart" works when there's only one colour; otherwise the
 // shopper picks a colour on the product page.
 const QuickAction = ({ product }) => {
-  const addToCart = useAddToCart();
+  const { add } = useCart();
   const productUrl = `/products/${product.slug}`;
 
   if (product.availability === "out") {
@@ -33,17 +33,11 @@ const QuickAction = ({ product }) => {
     );
   }
   const [only] = product.colors;
-  const line = cartLineFor(product, {
-    sku: only.sku,
-    color_name: only.name,
-    price_paise: product.price_paise,
-    image: product.image,
-  });
   return (
     <button
       type="button"
       className="productCardAdd"
-      onClick={() => addToCart(line)}
+      onClick={() => add(only.variant_id)}
       aria-label={`Add ${product.brand.name} ${product.name} to cart`}
     >
       <FaCartPlus aria-hidden="true" />

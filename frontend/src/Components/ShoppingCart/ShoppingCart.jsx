@@ -1,37 +1,36 @@
 import React, { useEffect, useState } from "react";
 import "./ShoppingCart.css";
-import { useSelector, useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
 import { MdOutlineClose } from "react-icons/md";
 
-import {
-  MAX_QUANTITY,
-  removeFromCart,
-  selectCartLines,
-  selectCartSubtotalPaise,
-  updateQuantity,
-} from "../../Features/Cart/cartSlice";
+import { useCart } from "../../Features/Cart/useCart";
+import { errorMessage } from "../../Api/errors";
 import { imageUrl } from "../../Utils/cloudinary";
 import { formatPaise } from "../../Utils/format";
 import { storeInfo } from "../../Config/storeInfo";
 
-// Lets the field be cleared while typing; the cart is only updated with a
-// valid number, and an empty field snaps back on blur.
-const QuantityInput = ({ line, className }) => {
-  const dispatch = useDispatch();
-  const { sku, name, quantity } = line;
+const productUrl = (line) => `/products/${line.product_slug}?variant=${encodeURIComponent(line.sku)}`;
+
+// The +/- buttons change the quantity at once; a typed number is applied when
+// the field loses focus or Enter is pressed.
+const QuantityInput = ({ line, onChange, className }) => {
+  const { product_name: name, quantity } = line;
   const [text, setText] = useState(String(quantity));
+  const max = Math.max(line.max_quantity, quantity);
 
   useEffect(() => setText(String(quantity)), [quantity]);
 
-  const setQuantity = (value) =>
-    dispatch(updateQuantity({ sku, quantity: value }));
+  const commit = () => {
+    const value = Math.min(max, parseInt(text, 10));
+    if (value >= 1 && value !== quantity) onChange(value);
+    else setText(String(quantity));
+  };
 
   return (
     <div className={className}>
       <button
         type="button"
-        onClick={() => setQuantity(quantity - 1)}
+        onClick={() => onChange(quantity - 1)}
         disabled={quantity <= 1}
         aria-label={`Decrease quantity of ${name}`}
       >
@@ -41,20 +40,17 @@ const QuantityInput = ({ line, className }) => {
         type="number"
         inputMode="numeric"
         min={1}
-        max={MAX_QUANTITY}
+        max={max}
         value={text}
         aria-label={`Quantity of ${name}`}
-        onChange={(event) => {
-          setText(event.target.value);
-          const value = parseInt(event.target.value, 10);
-          if (!Number.isNaN(value)) setQuantity(value);
-        }}
-        onBlur={() => setText(String(quantity))}
+        onChange={(event) => setText(event.target.value)}
+        onBlur={commit}
+        onKeyDown={(event) => event.key === "Enter" && commit()}
       />
       <button
         type="button"
-        onClick={() => setQuantity(quantity + 1)}
-        disabled={quantity >= MAX_QUANTITY}
+        onClick={() => onChange(quantity + 1)}
+        disabled={quantity >= line.max_quantity}
         aria-label={`Increase quantity of ${name}`}
       >
         +
@@ -63,19 +59,53 @@ const QuantityInput = ({ line, className }) => {
   );
 };
 
-const RemoveButton = ({ line, size }) => {
-  const dispatch = useDispatch();
+const RemoveButton = ({ line, onRemove, size }) => (
+  <button
+    type="button"
+    className="cartRemoveBtn"
+    onClick={() => onRemove(line.variant_id)}
+    aria-label={`Remove ${line.product_name} (${line.color_name}) from cart`}
+  >
+    <MdOutlineClose size={size} />
+  </button>
+);
+
+// What's wrong with a line, and the one-click fix where there is one.
+const LineIssue = ({ line, onChange }) => {
+  if (!line.issue) return null;
+  if (line.issue === "INSUFFICIENT_STOCK") {
+    return (
+      <p className="cartLineIssue" role="status">
+        Only {line.max_quantity} left.{" "}
+        <button type="button" className="cartLineFix" onClick={() => onChange(line.max_quantity)}>
+          Change to {line.max_quantity}
+        </button>
+      </p>
+    );
+  }
   return (
-    <button
-      type="button"
-      className="cartRemoveBtn"
-      onClick={() => dispatch(removeFromCart(line.sku))}
-      aria-label={`Remove ${line.name} (${line.colorName}) from cart`}
-    >
-      <MdOutlineClose size={size} />
-    </button>
+    <p className="cartLineIssue" role="status">
+      {line.issue === "OUT_OF_STOCK" ? "Out of stock" : "No longer available"} — please remove it to
+      continue.
+    </p>
   );
 };
+
+const LineName = ({ line, onChange }) => (
+  <>
+    <Link to={productUrl(line)}>
+      <h4>{line.product_name}</h4>
+    </Link>
+    <p>Colour: {line.color_name}</p>
+    <LineIssue line={line} onChange={onChange} />
+  </>
+);
+
+const LineImage = ({ line }) => (
+  <Link to={productUrl(line)} tabIndex={-1} aria-hidden="true">
+    <img src={imageUrl(line.image, 240) ?? undefined} alt="" width={120} height={120} />
+  </Link>
+);
 
 const CartEmpty = () => (
   <div className="shoppingCartEmpty">
@@ -89,10 +119,7 @@ const CartEmpty = () => (
 const CheckoutNotice = () => (
   <div className="checkoutNotice" role="status">
     <h4>Online checkout is launching soon</h4>
-    <p>
-      To order now, call your nearest store and we’ll keep your frames
-      ready:
-    </p>
+    <p>To order now, call your nearest store and we’ll keep your frames ready:</p>
     <ul>
       {storeInfo.stores.map((store) => (
         <li key={store.name}>
@@ -103,123 +130,130 @@ const CheckoutNotice = () => (
   </div>
 );
 
+const CartLines = ({ lines, setQuantity, remove }) => (
+  <>
+    {/* Desktop and tablet */}
+    <table className="shoppingBagTable">
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>
+            <span className="visuallyHidden">Details</span>
+          </th>
+          <th>Price</th>
+          <th>Quantity</th>
+          <th>Subtotal</th>
+          <th>
+            <span className="visuallyHidden">Remove</span>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        {lines.map((line) => {
+          const onChange = (quantity) => setQuantity(line.variant_id, quantity);
+          return (
+            <tr key={line.variant_id} className={line.issue ? "cartLineHasIssue" : undefined}>
+              <td>
+                <div className="shoppingBagTableImg">
+                  <LineImage line={line} />
+                </div>
+              </td>
+              <td>
+                <div className="shoppingBagTableProductDetail">
+                  <LineName line={line} onChange={onChange} />
+                </div>
+              </td>
+              <td>
+                {formatPaise(line.unit_price_paise)}
+                {line.mrp_paise > line.unit_price_paise && (
+                  <s className="cartLineMrp">{formatPaise(line.mrp_paise)}</s>
+                )}
+              </td>
+              <td>
+                {line.issue === "INACTIVE" ? (
+                  line.quantity
+                ) : (
+                  <QuantityInput line={line} onChange={onChange} className="ShoppingBagTableQuantity" />
+                )}
+              </td>
+              <td>
+                <p className="cartLineTotal">{formatPaise(line.line_total_paise)}</p>
+              </td>
+              <td>
+                <RemoveButton line={line} onRemove={remove} />
+              </td>
+            </tr>
+          );
+        })}
+      </tbody>
+    </table>
+
+    {/* Mobile */}
+    <div className="shoppingBagTableMobile">
+      {lines.map((line) => {
+        const onChange = (quantity) => setQuantity(line.variant_id, quantity);
+        return (
+          <div
+            className={`shoppingBagTableMobileItems ${line.issue ? "cartLineHasIssue" : ""}`}
+            key={line.variant_id}
+          >
+            <div className="shoppingBagTableMobileItemsImg">
+              <LineImage line={line} />
+            </div>
+            <div className="shoppingBagTableMobileItemsDetail">
+              <div className="shoppingBagTableMobileItemsDetailMain">
+                <LineName line={line} onChange={onChange} />
+                {line.issue !== "INACTIVE" && (
+                  <QuantityInput line={line} onChange={onChange} className="shoppingBagTableMobileQuantity" />
+                )}
+                <span>{formatPaise(line.unit_price_paise)}</span>
+              </div>
+              <div className="shoppingBagTableMobileItemsDetailTotal">
+                <RemoveButton line={line} onRemove={remove} size={20} />
+                <p>{formatPaise(line.line_total_paise)}</p>
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  </>
+);
+
 const ShoppingCart = () => {
-  const lines = useSelector(selectCartLines);
-  const subtotal = useSelector(selectCartSubtotalPaise);
+  // Re-priced every time the page opens.
+  const { cart, isLoading, error, refetch, setQuantity, remove } = useCart({ fresh: true });
   const [showCheckoutNotice, setShowCheckoutNotice] = useState(false);
+  const lines = cart?.lines ?? [];
+
+  let content;
+  if (isLoading) {
+    content = (
+      <p className="cartStatus" role="status">
+        Loading your cart…
+      </p>
+    );
+  } else if (error) {
+    content = (
+      <div className="cartStatus" role="alert">
+        <p>{errorMessage(error, "We couldn’t load your cart.")}</p>
+        <button type="button" className="cartShopNow" onClick={refetch}>
+          Try again
+        </button>
+      </div>
+    );
+  } else if (lines.length === 0) {
+    content = <CartEmpty />;
+  } else {
+    content = <CartLines lines={lines} setQuantity={setQuantity} remove={remove} />;
+  }
 
   return (
     <div className="shoppingCartSection">
       <h2>Cart</h2>
 
       <div className="shoppingBagSection">
-        <div className="shoppingBagTableSection">
-          {lines.length === 0 ? (
-            <CartEmpty />
-          ) : (
-            <>
-              {/* Desktop and tablet */}
-              <table className="shoppingBagTable">
-                <thead>
-                  <tr>
-                    <th>Product</th>
-                    <th>
-                      <span className="visuallyHidden">Details</span>
-                    </th>
-                    <th>Price</th>
-                    <th>Quantity</th>
-                    <th>Subtotal</th>
-                    <th>
-                      <span className="visuallyHidden">Remove</span>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {lines.map((line) => {
-                    const productUrl = `/products/${line.slug}?variant=${encodeURIComponent(line.sku)}`;
-                    return (
-                      <tr key={line.sku}>
-                        <td>
-                          <div className="shoppingBagTableImg">
-                            <Link to={productUrl} tabIndex={-1} aria-hidden="true">
-                              <img
-                                src={imageUrl(line.image, 240) ?? undefined}
-                                alt=""
-                                width={120}
-                                height={120}
-                              />
-                            </Link>
-                          </div>
-                        </td>
-                        <td>
-                          <div className="shoppingBagTableProductDetail">
-                            <Link to={productUrl}>
-                              <h4>{line.name}</h4>
-                            </Link>
-                            <p>Colour: {line.colorName}</p>
-                          </div>
-                        </td>
-                        <td>{formatPaise(line.pricePaise)}</td>
-                        <td>
-                          <QuantityInput
-                            line={line}
-                            className="ShoppingBagTableQuantity"
-                          />
-                        </td>
-                        <td>
-                          <p className="cartLineTotal">
-                            {formatPaise(line.lineTotalPaise)}
-                          </p>
-                        </td>
-                        <td>
-                          <RemoveButton line={line} />
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-
-              {/* Mobile */}
-              <div className="shoppingBagTableMobile">
-                {lines.map((line) => {
-                  const productUrl = `/products/${line.slug}?variant=${encodeURIComponent(line.sku)}`;
-                  return (
-                    <div className="shoppingBagTableMobileItems" key={line.sku}>
-                      <div className="shoppingBagTableMobileItemsImg">
-                        <Link to={productUrl} tabIndex={-1} aria-hidden="true">
-                          <img
-                            src={imageUrl(line.image, 240) ?? undefined}
-                            alt=""
-                            width={120}
-                            height={120}
-                          />
-                        </Link>
-                      </div>
-                      <div className="shoppingBagTableMobileItemsDetail">
-                        <div className="shoppingBagTableMobileItemsDetailMain">
-                          <Link to={productUrl}>
-                            <h4>{line.name}</h4>
-                          </Link>
-                          <p>Colour: {line.colorName}</p>
-                          <QuantityInput
-                            line={line}
-                            className="shoppingBagTableMobileQuantity"
-                          />
-                          <span>{formatPaise(line.pricePaise)}</span>
-                        </div>
-                        <div className="shoppingBagTableMobileItemsDetailTotal">
-                          <RemoveButton line={line} size={20} />
-                          <p>{formatPaise(line.lineTotalPaise)}</p>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </>
-          )}
-        </div>
+        <div className="shoppingBagTableSection">{content}</div>
 
         <div className="shoppingBagTotal">
           <h3>Cart Totals</h3>
@@ -227,8 +261,14 @@ const ShoppingCart = () => {
             <tbody>
               <tr>
                 <th>Subtotal</th>
-                <td>{formatPaise(subtotal)}</td>
+                <td>{formatPaise(cart?.subtotal_paise ?? 0)}</td>
               </tr>
+              {cart?.savings_paise > 0 && (
+                <tr>
+                  <th>You save</th>
+                  <td className="cartSavings">{formatPaise(cart.savings_paise)}</td>
+                </tr>
+              )}
               <tr>
                 <th>Shipping</th>
                 <td>Calculated at checkout</td>
@@ -236,16 +276,21 @@ const ShoppingCart = () => {
               <tr>
                 <th>Total</th>
                 <td>
-                  {formatPaise(subtotal)}
+                  {formatPaise(cart?.subtotal_paise ?? 0)}
                   <p className="cartTaxNote">Prices include GST</p>
                 </td>
               </tr>
             </tbody>
           </table>
+          {cart?.has_issues && (
+            <p className="cartLineIssue" role="status">
+              Some items need your attention before checkout.
+            </p>
+          )}
           <button
             type="button"
             onClick={() => setShowCheckoutNotice(true)}
-            disabled={lines.length === 0}
+            disabled={lines.length === 0 || cart.has_issues}
           >
             Proceed to Checkout
           </button>

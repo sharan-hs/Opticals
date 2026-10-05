@@ -34,6 +34,7 @@ class CategoryRef(BaseModel):
 
 
 class ColorSwatch(BaseModel):
+    variant_id: int
     name: str
     hex: str | None
     sku: str

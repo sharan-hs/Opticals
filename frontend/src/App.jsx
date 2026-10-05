@@ -11,6 +11,7 @@ import ScrollToTop from "./Components/ScrollButton/ScrollToTop";
 import ScrollToTopOnNavigate from "./Components/ScrollButton/ScrollToTopOnNavigate";
 import PageLoading from "./Components/PageLoading/PageLoading";
 import { RequireAuth, RequireRole, useSessionRestore } from "./Features/Auth/guards";
+import { useCartSync } from "./Features/Cart/useCart";
 
 // Every page except the landing page is downloaded on first visit.
 const About = lazy(() => import("./Pages/About"));
@@ -34,6 +35,7 @@ const ShoppingCart = lazy(() => import("./Components/ShoppingCart/ShoppingCart")
 // Storefront pages share the header and footer; /admin has its own layout.
 const Shell = () => {
   useSessionRestore();
+  useCartSync();
   const { pathname } = useLocation();
 
   if (pathname.startsWith("/admin")) {
