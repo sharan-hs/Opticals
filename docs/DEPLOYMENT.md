@@ -57,8 +57,10 @@ The root `vercel.json` turns off Git deployments for any Vercel project rooted a
    | `CORS_ORIGINS` | `https://www.<domain>` (until there's a domain: `https://vijai-opticians.vercel.app`) |
    | `FRONTEND_URL` | same as above |
    | `SENTRY_DSN` | optional |
+   | `CLOUDINARY_API_KEY` | Cloudinary → Settings → API Keys, key `website` (role **Master admin**) |
+   | `CLOUDINARY_API_SECRET` | same row; generate a fresh secret first (see docs/ADDING_PHOTOS.md) |
 
-   Later phases add Razorpay, Cloudinary and email keys here too, and only here.
+   Later phases add Razorpay and email keys here too, and only here.
 5. **Frontend.** Add New → Project → `Opticals` again: name `vijai-opticians`, Root Directory `frontend` (Vite is detected). Variable `VITE_CLOUDINARY_CLOUD_NAME` is only needed if it differs from the default.
 6. Open `https://vijai-opticians.vercel.app/api/v1/...` once API routes exist, or check the backend directly at `https://vijai-opticians-api.vercel.app/health/ready`.
 

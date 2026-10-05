@@ -23,5 +23,5 @@ Any shape or size of photo works: every photo is made square and white-backed, s
 - Take several angles: front, side (to show the temple), and a three-quarter view.
 - One pair of glasses per photo.
 
-## Before this works (one-time setup by Sharan)
-Uploading needs the shop's Cloudinary **API key** and **API secret**. They are under Cloudinary → Settings → API Keys, and go in the backend settings (`backend/.env` locally, and the API project's environment variables on Vercel). Until then, the Photos tab says uploads aren't switched on yet.
+## Setup (done locally on 2026-10-05)
+Uploads use a Cloudinary API key named `website` on the shop's account (`dyf8dp9oo`), with the **Master admin** role. A key without permissions can't upload ("missing permissions: create") or check photos ("read"). The key and secret live only in `backend/.env` (git-ignored). At go-live, the same two values go into the API project's environment variables on Vercel: `CLOUDINARY_API_KEY` and `CLOUDINARY_API_SECRET`. Generate a fresh secret before then, because the current one was shared in a chat.
