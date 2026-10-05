@@ -124,6 +124,8 @@ def make_order(db: Session, user: User, **overrides: Any) -> Order:
         "idempotency_key": uuid.uuid4(),
         "expires_at": None,
         "status": "CONFIRMED",
+        "payment_method": "UPI",
+        "fulfilment": "DELIVERY",
     } | overrides
     order = Order(user_id=user.id, **values)
     db.add(order)

@@ -31,6 +31,9 @@ REGISTER = Limit("register", 3, 60)
 FORGOT_PASSWORD = Limit("forgot", 3, 3600)
 RESET_PASSWORD = Limit("reset", 10, 3600)
 REFRESH = Limit("refresh", 60, 60)
+# Per signed-in user.
+PLACE_ORDER = Limit("order", 10, 3600)
+REPORT_PAYMENT = Limit("payment-report", 10, 3600)
 
 _HIT_SQL = text(
     """

@@ -180,7 +180,7 @@ def get_cart(db: Session, user: User) -> CartOut:
     return _price(_load(db, (line.variant_id for line in lines)), lines)
 
 
-def _locked_cart(db: Session, user: User) -> Cart:
+def lock_cart(db: Session, user: User) -> Cart:
     """The user's cart, created on first use, locked until the caller commits."""
     db.execute(insert(Cart).values(user_id=user.id).on_conflict_do_nothing())
     return db.scalars(
@@ -228,7 +228,7 @@ def _find(cart: Cart, variant_id: int) -> CartItem | None:
 
 def add_item(db: Session, user: User, variant_id: int, quantity: int) -> CartOut:
     """Adds to the line for this colour (quantities merge)."""
-    cart = _locked_cart(db, user)
+    cart = lock_cart(db, user)
     _, variant = _require_purchasable(db, variant_id)
     item = _find(cart, variant_id)
     in_cart = item.quantity if item else 0
@@ -249,7 +249,7 @@ def add_item(db: Session, user: User, variant_id: int, quantity: int) -> CartOut
 def set_quantity(db: Session, user: User, variant_id: int, quantity: int) -> CartOut:
     """Lowering a quantity always works (it's how a stock issue gets fixed);
     raising it needs the stock."""
-    cart = _locked_cart(db, user)
+    cart = lock_cart(db, user)
     item = _find(cart, variant_id)
     if item is None:
         raise NotFoundError("This item isn't in your cart.")
@@ -263,7 +263,7 @@ def set_quantity(db: Session, user: User, variant_id: int, quantity: int) -> Car
 
 def remove_item(db: Session, user: User, variant_id: int) -> CartOut:
     """Idempotent: removing a line that isn't there just returns the cart."""
-    cart = _locked_cart(db, user)
+    cart = lock_cart(db, user)
     item = _find(cart, variant_id)
     if item is not None:
         cart.items.remove(item)
@@ -286,7 +286,7 @@ def merge(db: Session, user: User, items: Iterable[CartLineIn]) -> CartMergeOut:
     no longer sold are dropped. Out-of-stock colours are kept (shown as such),
     so nothing the shopper chose silently disappears."""
     guest = _combine(items, cap=None)  # capped below, so the cut is reported
-    cart = _locked_cart(db, user)
+    cart = lock_cart(db, user)
     catalogue = _load(db, (line.variant_id for line in guest))
     adjusted: list[int] = []
     for line in guest:

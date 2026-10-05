@@ -39,6 +39,14 @@ def engine() -> Iterator[Engine]:
     yield app_engine
 
 
+@pytest.fixture(autouse=True)
+def no_real_cloudinary(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Tests never reach the shop's Cloudinary account, whatever backend/.env holds."""
+    settings = get_settings()
+    monkeypatch.setattr(settings, "cloudinary_api_key", None)
+    monkeypatch.setattr(settings, "cloudinary_api_secret", None)
+
+
 @pytest.fixture
 def db(engine: Engine) -> Iterator[Session]:
     """A session whose work is rolled back after each test, even if the code commits."""

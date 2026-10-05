@@ -65,6 +65,8 @@ class Settings(BaseSettings):
 
     log_level: str = "INFO"
     sentry_dsn: str | None = None
+    # Vercel Cron sends it as a Bearer token to /internal/expire-orders.
+    cron_secret: str | None = None
 
     @field_validator("database_url", "test_database_url")
     @classmethod

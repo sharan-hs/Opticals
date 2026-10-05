@@ -22,7 +22,7 @@ from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base, CreatedAtMixin, TimestampMixin, enum_column, id_column
-from app.models.enums import OrderStatus, PaymentStatus
+from app.models.enums import FulfilmentMethod, OrderStatus, PaymentMethod, PaymentStatus
 
 if TYPE_CHECKING:
     from app.models.payments import Payment
@@ -45,6 +45,8 @@ class Order(TimestampMixin, Base):
         default=PaymentStatus.UNPAID,
         server_default=PaymentStatus.UNPAID.value,
     )
+    payment_method: Mapped[PaymentMethod] = enum_column(PaymentMethod)
+    fulfilment: Mapped[FulfilmentMethod] = enum_column(FulfilmentMethod)
     currency: Mapped[str] = mapped_column(String(3), default="INR", server_default="INR")
     # Prices include GST; tax_paise is the GST contained in the total, for invoices.
     subtotal_paise: Mapped[int] = mapped_column(BigInteger)
@@ -53,8 +55,11 @@ class Order(TimestampMixin, Base):
     tax_paise: Mapped[int] = mapped_column(BigInteger, default=0, server_default="0")
     total_paise: Mapped[int] = mapped_column(BigInteger)
     coupon_code: Mapped[str | None] = mapped_column(String(30))
-    # {full_name, phone, line1, line2, landmark, city, state, pincode, country}
-    shipping_address: Mapped[dict[str, Any]] = mapped_column(JSONB)
+    # Delivery: {full_name, phone, line1, line2, landmark, city, state, pincode, country}
+    # none_as_null: None is stored as SQL NULL (not JSON null) so the checks below see it.
+    shipping_address: Mapped[dict[str, Any] | None] = mapped_column(JSONB(none_as_null=True))
+    # Pickup: {id, name, address, phone} of the store, as it was when ordered.
+    pickup_store: Mapped[dict[str, Any] | None] = mapped_column(JSONB(none_as_null=True))
     contact_email: Mapped[str] = mapped_column(String(254))
     contact_phone: Mapped[str | None] = mapped_column(String(16))
     customer_note: Mapped[str | None] = mapped_column(Text)
@@ -104,6 +109,11 @@ class Order(TimestampMixin, Base):
         CheckConstraint(
             "status <> 'PENDING_PAYMENT' OR expires_at IS NOT NULL",
             name="pending_has_expiry",
+        ),
+        CheckConstraint(
+            "(fulfilment = 'DELIVERY') = (shipping_address IS NOT NULL) "
+            "AND (fulfilment = 'PICKUP') = (pickup_store IS NOT NULL)",
+            name="destination_matches_fulfilment",
         ),
         Index("ix_orders_user_created", "user_id", text("created_at DESC")),
         Index("ix_orders_status_created", "status", text("created_at DESC")),

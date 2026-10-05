@@ -209,6 +209,8 @@ erDiagram
         bigint user_id FK
         enum status
         enum payment_status
+        enum payment_method
+        enum fulfilment
         varchar currency
         bigint subtotal_paise
         bigint discount_paise
@@ -217,6 +219,7 @@ erDiagram
         bigint total_paise
         varchar coupon_code
         jsonb shipping_address
+        jsonb pickup_store
         varchar contact_email
         varchar contact_phone
         text customer_note

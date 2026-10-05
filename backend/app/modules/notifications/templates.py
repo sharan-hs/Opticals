@@ -7,7 +7,7 @@ from app.modules.notifications.email import EmailMessage
 STORE_NAME = "Vijai Opticians"
 
 
-def _html(body: str) -> str:
+def html_page(body: str) -> str:
     return (
         '<!doctype html><html><body style="font-family:Arial,sans-serif;color:#1b1b1b;'
         'line-height:1.6;max-width:560px;margin:0 auto;padding:24px">'
@@ -26,7 +26,7 @@ def password_reset_email(*, to: str, name: str, reset_url: str, minutes: int) ->
         "If you didn't ask for this, ignore this email; your password won't change.\n\n"
         f"{STORE_NAME}"
     )
-    html = _html(
+    html = html_page(
         f"<p>Hi {escape(name)},</p>"
         f"<p>We received a request to reset your {STORE_NAME} password. "
         f"Use the button below within {minutes} minutes to choose a new one.</p>"
@@ -45,7 +45,7 @@ def password_changed_email(*, to: str, name: str) -> EmailMessage:
         "If this wasn't you, reset your password straight away and contact us.\n\n"
         f"{STORE_NAME}"
     )
-    html = _html(
+    html = html_page(
         f"<p>Hi {escape(name)},</p>"
         f"<p>Your {STORE_NAME} password was just changed and you've been signed out "
         "everywhere else.</p>"

@@ -93,6 +93,7 @@ class PaymentStatus(StrEnum):
     """Order-level payment state, tracked separately from fulfilment."""
 
     UNPAID = "UNPAID"
+    VERIFYING = "VERIFYING"  # the customer says they've paid; the shop is checking
     PAID = "PAID"
     REFUND_PENDING = "REFUND_PENDING"
     REFUNDED = "REFUNDED"
@@ -102,7 +103,20 @@ class PaymentStatus(StrEnum):
 
 class PaymentProviderName(StrEnum):
     RAZORPAY = "RAZORPAY"
+    MANUAL = "MANUAL"  # UPI to the shop's own ID, or paid at the store; confirmed by staff
     FAKE = "FAKE"  # local development and tests
+
+
+class PaymentMethod(StrEnum):
+    """How the customer chose to pay at checkout."""
+
+    UPI = "UPI"  # to the shop's UPI ID, checked by staff
+    PAY_AT_STORE = "PAY_AT_STORE"
+
+
+class FulfilmentMethod(StrEnum):
+    DELIVERY = "DELIVERY"
+    PICKUP = "PICKUP"
 
 
 class PaymentAttemptStatus(StrEnum):

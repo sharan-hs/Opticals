@@ -116,6 +116,17 @@ def create_admin(
     typer.secho(f"Admin {email} created.", fg="green")
 
 
+@cli.command("expire-orders")
+def expire_orders() -> None:
+    """Cancel unpaid orders whose time ran out and release their stock."""
+    from app.modules.orders import workflow
+
+    with SessionLocal() as db:
+        expired = workflow.expire_due(db, limit=500)
+        db.commit()
+    typer.echo(f"Expired {len(expired)} orders.")
+
+
 @cli.command("er-diagram")
 def er_diagram(
     output: Path = typer.Option(
