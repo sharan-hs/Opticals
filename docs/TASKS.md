@@ -10,9 +10,9 @@ Companion to [ARCHITECTURE_PLAN.md](ARCHITECTURE_PLAN.md). Section references li
 
 ## Progress
 
-Last updated: 2026-10-04 20:22
+Last updated: 2026-10-05 20:46
 
-_Status: Phases 5–6 done on phase2/backend-foundation (c7a76b1): catalogue + admin + stock. Backend 175 tests, frontend 29, browser runs storefront 14/14 and admin 16/16. Paused for user testing (docs/PHASE5_6_TESTING.md)._
+_Status: Phase 7 done (600a5e0): server cart, live pricing, stock issues, guest merge on sign-in. Backend 194 tests, frontend 32, browser run 22/22. Paused for user testing (docs/PHASE7_TESTING.md)._
 
 | Phase | Done | In progress | Total | % done |
 |---|---:|---:|---:|---:|
@@ -23,7 +23,7 @@ _Status: Phases 5–6 done on phase2/backend-foundation (c7a76b1): catalogue + a
 | Phase 4 | 32 | 0 | 32 | 100% |
 | Phase 5 | 35 | 4 | 39 | 90% |
 | Phase 6 | 14 | 0 | 14 | 100% |
-| Phase 7 | 0 | 0 | 13 | 0% |
+| Phase 7 | 13 | 0 | 13 | 100% |
 | Phase 8 | 0 | 0 | 21 | 0% |
 | Phase 9 | 0 | 0 | 15 | 0% |
 | Phase 10 | 0 | 0 | 10 | 0% |
@@ -31,9 +31,10 @@ _Status: Phases 5–6 done on phase2/backend-foundation (c7a76b1): catalogue + a
 | Phase 12 | 0 | 2 | 21 | 0% |
 | P1 | 0 | 0 | 12 | 0% |
 | P2 | 0 | 0 | 7 | 0% |
-| **All** | **258** | **19** | **417** | **62%** |
+| **All** | **271** | **19** | **417** | **65%** |
 
 **Recently completed**
+- 7.1–7.13 Server cart: live pricing, stock checks, guest merge, cart page issues + one-click fixes
 - Cart lines are now SKUs (snapshot until Phase 7 server pricing)
 - 6.1–6.14 Inventory: locked ledger, admin stock grid, adjust dialog, history, transactions log
 - 5.4.x Admin catalogue UI: products, editor tabs, categories, brands
@@ -45,8 +46,8 @@ _Status: Phases 5–6 done on phase2/backend-foundation (c7a76b1): catalogue + a
 - 4.1.1–4.1.18 Backend auth: Argon2, JWT, refresh rotation, addresses, email, rate limits, create-admin
 
 **Up next**
-- 👤 User testing of Phases 5–6 (docs/PHASE5_6_TESTING.md)
-- Phase 7 Server cart
+- 👤 User testing of Phase 7 (docs/PHASE7_TESTING.md)
+- Phase 8 Checkout & orders (needs 👤 shipping fee + GST decision, 0.4.2/0.4.3)
 - 👤 Cloudinary API key/secret (unblocks 5.2.8, 5.2.9, 5.4.11, 3.3.4)
 - 👤 Open PRs; 2.5.5 enable branch protection
 - 👤 12.2 Owner accounts (GitHub transfer, Vercel Pro, Neon)
@@ -81,6 +82,8 @@ Work top to bottom inside a phase unless a dependency says otherwise.
 ---
 
 ## Phase 1 — Frontend cleanup (existing React app, static data)
+
+> ✅ Phase 7 done (600a5e0): server cart, live pricing, stock issues, guest merge on sign-in. Backend 194 tests, frontend 32, browser run 22/22. Paused for user testing (docs/PHASE7_TESTING.md).
 
 > ✅ Phases 5–6 done on phase2/backend-foundation (c7a76b1): catalogue + admin + stock. Backend 175 tests, frontend 29, browser runs storefront 14/14 and admin 16/16. Paused for user testing (docs/PHASE5_6_TESTING.md).
 
@@ -477,19 +480,19 @@ Work top to bottom inside a phase unless a dependency says otherwise.
 
 ## Phase 7 — Cart
 
-- [ ] 7.1 Cart service: get-or-create, add (merge quantities), update, remove, clear
-- [ ] 7.2 Live pricing + line issues (OUT_OF_STOCK, PRICE_CHANGED, INACTIVE)
-- [ ] 7.3 Stock clamp on add/update (409 with available quantity)
-- [ ] 7.4 `GET /cart`, `POST /cart/items`, `PATCH /cart/items/{id}`, `DELETE /cart/items/{id}`, `DELETE /cart`
-- [ ] 7.5 `POST /cart/merge` (guest → server)
-- [ ] 7.6 `POST /cart/preview` (public guest pricing)
-- [ ] 7.7 Tests incl. ownership and merge edge cases
-- [ ] 7.8 Frontend: guest cart slice stores `{variant_id, quantity}` (migrate Phase-1 localStorage format)
-- [ ] 7.9 Frontend: `useCart()` hides guest vs server
-- [ ] 7.10 Frontend: cart page from API (priced lines, issues shown, optimistic quantity with rollback)
-- [ ] 7.11 Frontend: merge on login, clear guest cart
-- [ ] 7.12 Frontend: header badge from server cart when signed in
-- [ ] 7.13 Tests (MSW)
+- [x] 7.1 Cart service: get-or-create, add (merge quantities), update, remove, clear
+- [x] 7.2 Live pricing + line issues (OUT_OF_STOCK, PRICE_CHANGED, INACTIVE) _(issues are INACTIVE / OUT_OF_STOCK / INSUFFICIENT_STOCK; PRICE_CHANGED moved to the Phase 8 checkout quote, since carts never store prices)_
+- [x] 7.3 Stock clamp on add/update (409 with available quantity)
+- [x] 7.4 `GET /cart`, `POST /cart/items`, `PATCH /cart/items/{id}`, `DELETE /cart/items/{id}`, `DELETE /cart` _(item routes keyed by variant_id (/cart/items/{variant_id}), not item id, so guest and server carts share one key)_
+- [x] 7.5 `POST /cart/merge` (guest → server)
+- [x] 7.6 `POST /cart/preview` (public guest pricing)
+- [x] 7.7 Tests incl. ownership and merge edge cases
+- [x] 7.8 Frontend: guest cart slice stores `{variant_id, quantity}` (migrate Phase-1 localStorage format) _(guest cart is localStorage v3 {variant_id, quantity}; v1/v2 dropped)_
+- [x] 7.9 Frontend: `useCart()` hides guest vs server
+- [x] 7.10 Frontend: cart page from API (priced lines, issues shown, optimistic quantity with rollback)
+- [x] 7.11 Frontend: merge on login, clear guest cart
+- [x] 7.12 Frontend: header badge from server cart when signed in
+- [x] 7.13 Tests (MSW)
 - **Done when:** cart follows the user across devices; guest cart merges on login.
 
 ---
