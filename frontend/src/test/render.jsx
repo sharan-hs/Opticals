@@ -2,6 +2,7 @@ import React from "react";
 import { render } from "@testing-library/react";
 import { Provider } from "react-redux";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
+import { HelmetProvider } from "react-helmet-async";
 
 import { makeStore } from "../App/store";
 
@@ -9,14 +10,16 @@ import { makeStore } from "../App/store";
 export const renderApp = (routes, { path = "/", preloadedState } = {}) => {
   const store = makeStore(preloadedState);
   const utils = render(
-    <Provider store={store}>
-      <MemoryRouter initialEntries={[path]}>
-        <Routes>
-          {routes}
-          <Route path="*" element={<p>Other page</p>} />
-        </Routes>
-      </MemoryRouter>
-    </Provider>
+    <HelmetProvider>
+      <Provider store={store}>
+        <MemoryRouter initialEntries={[path]}>
+          <Routes>
+            {routes}
+            <Route path="*" element={<p>Other page</p>} />
+          </Routes>
+        </MemoryRouter>
+      </Provider>
+    </HelmetProvider>
   );
   return { store, ...utils };
 };

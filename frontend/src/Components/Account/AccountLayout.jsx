@@ -8,6 +8,7 @@ import { useSignOut } from "../../Features/Auth/useSignOut";
 
 const LINKS = [
   { to: "/account", label: "Profile", end: true },
+  { to: "/account/orders", label: "Orders" },
   { to: "/account/addresses", label: "Addresses" },
   { to: "/account/security", label: "Password & security" },
 ];

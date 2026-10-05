@@ -5,12 +5,15 @@ import "./Admin.css";
 
 import { selectCurrentUser } from "../Features/Auth/authSlice";
 import { useSignOut } from "../Features/Auth/useSignOut";
-import { useLowStockQuery } from "../Features/Admin/adminApi";
+import { useLowStockQuery, useOrderCountsQuery } from "../Features/Admin/adminApi";
 
 const AdminLayout = () => {
   const user = useSelector(selectCurrentUser);
   const [signOut] = useSignOut();
   const { data: low = [] } = useLowStockQuery();
+  // Payments to check, orders to ship and refunds due; refreshed every minute.
+  const { data: counts } = useOrderCountsQuery(undefined, { pollingInterval: 60000 });
+  const todo = counts ? counts.to_verify + counts.to_ship + counts.refunds_pending : 0;
 
   return (
     <div className="adminShell">
@@ -20,6 +23,14 @@ const AdminLayout = () => {
           <span>Admin</span>
         </Link>
         <nav aria-label="Admin">
+          <NavLink to="/admin/orders">
+            Orders
+            {todo > 0 && (
+              <span className="adminNavCount" aria-label={`${todo} orders need action`}>
+                {todo}
+              </span>
+            )}
+          </NavLink>
           <NavLink to="/admin/products">Products</NavLink>
           <NavLink to="/admin/inventory" end>
             Stock
@@ -32,6 +43,7 @@ const AdminLayout = () => {
           <NavLink to="/admin/inventory/history">Stock history</NavLink>
           <NavLink to="/admin/categories">Categories</NavLink>
           <NavLink to="/admin/brands">Brands</NavLink>
+          <NavLink to="/admin/settings">Settings</NavLink>
         </nav>
         <div className="adminSidebarFooter">
           <p>{user?.full_name}</p>

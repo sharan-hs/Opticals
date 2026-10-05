@@ -6,5 +6,6 @@
       "includeFiles": "{app/**,alembic/**,alembic.ini}",
       "excludeFiles": "{tests/**,**/__pycache__/**,.venv/**}"
     }
-  }
+  },
+  "crons": [{ "path": "/api/v1/internal/expire-orders", "schedule": "*/10 * * * *" }]
 }

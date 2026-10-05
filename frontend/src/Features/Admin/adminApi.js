@@ -4,6 +4,8 @@ import { toQueryString } from "../../Api/query";
 // Writes refresh the admin views and the storefront (prices, stock, images).
 const CATALOG_WRITE = ["AdminCatalog", "AdminInventory", "Catalog"];
 const STOCK_WRITE = ["AdminInventory", "AdminCatalog", "Catalog"];
+// Order actions move stock and change what the customer sees.
+const ORDER_WRITE = ["AdminOrders", "AdminInventory", "Catalog", "Orders"];
 
 export const adminApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
@@ -155,6 +157,39 @@ export const adminApi = baseApi.injectEndpoints({
       query: (params) => `/admin/inventory/transactions${toQueryString(params)}`,
       providesTags: ["AdminInventory"],
     }),
+
+    // orders
+    listAdminOrders: build.query({
+      query: (params) => `/admin/orders${toQueryString(params)}`,
+      providesTags: ["AdminOrders"],
+    }),
+    orderCounts: build.query({
+      query: () => "/admin/orders/counts",
+      providesTags: ["AdminOrders"],
+    }),
+    getAdminOrder: build.query({
+      query: (orderNumber) => `/admin/orders/${orderNumber}`,
+      providesTags: ["AdminOrders"],
+    }),
+    // action: confirm-payment | reject-payment | collected | status | cancel | refunded
+    orderAction: build.mutation({
+      query: ({ orderNumber, action, ...body }) => ({
+        url: `/admin/orders/${orderNumber}/${action}`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ORDER_WRITE,
+    }),
+
+    // settings
+    getShopSettings: build.query({
+      query: () => "/admin/settings",
+      providesTags: ["AdminSettings"],
+    }),
+    updateShopSettings: build.mutation({
+      query: (body) => ({ url: "/admin/settings", method: "PATCH", body }),
+      invalidatesTags: ["AdminSettings", "Cart"],
+    }),
   }),
 });
 
@@ -187,6 +222,12 @@ export const {
   useMarkOutOfStockMutation,
   useSetThresholdMutation,
   useListTransactionsQuery,
+  useListAdminOrdersQuery,
+  useOrderCountsQuery,
+  useGetAdminOrderQuery,
+  useOrderActionMutation,
+  useGetShopSettingsQuery,
+  useUpdateShopSettingsMutation,
 } = adminApi;
 
 // Rupees typed in forms <-> paise for the API.

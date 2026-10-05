@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from "react";
 import "./ShoppingCart.css";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { MdOutlineClose } from "react-icons/md";
 
 import { useCart } from "../../Features/Cart/useCart";
 import { errorMessage } from "../../Api/errors";
 import { imageUrl } from "../../Utils/cloudinary";
 import { formatPaise } from "../../Utils/format";
-import { storeInfo } from "../../Config/storeInfo";
 
 const productUrl = (line) => `/products/${line.product_slug}?variant=${encodeURIComponent(line.sku)}`;
 
@@ -116,20 +115,6 @@ const CartEmpty = () => (
   </div>
 );
 
-const CheckoutNotice = () => (
-  <div className="checkoutNotice" role="status">
-    <h4>Online checkout is launching soon</h4>
-    <p>To order now, call your nearest store and we’ll keep your frames ready:</p>
-    <ul>
-      {storeInfo.stores.map((store) => (
-        <li key={store.name}>
-          {store.name}: <a href={store.phoneHref}>{store.phone}</a>
-        </li>
-      ))}
-    </ul>
-  </div>
-);
-
 const CartLines = ({ lines, setQuantity, remove }) => (
   <>
     {/* Desktop and tablet */}
@@ -223,7 +208,7 @@ const CartLines = ({ lines, setQuantity, remove }) => (
 const ShoppingCart = () => {
   // Re-priced every time the page opens.
   const { cart, isLoading, error, refetch, setQuantity, remove } = useCart({ fresh: true });
-  const [showCheckoutNotice, setShowCheckoutNotice] = useState(false);
+  const navigate = useNavigate();
   const lines = cart?.lines ?? [];
 
   let content;
@@ -289,12 +274,11 @@ const ShoppingCart = () => {
           )}
           <button
             type="button"
-            onClick={() => setShowCheckoutNotice(true)}
+            onClick={() => navigate("/checkout")}
             disabled={lines.length === 0 || cart.has_issues}
           >
             Proceed to Checkout
           </button>
-          {showCheckoutNotice && <CheckoutNotice />}
         </div>
       </div>
     </div>

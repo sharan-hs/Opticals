@@ -533,7 +533,7 @@ def test_expiry_job_endpoint(
     assert order is not None
     order.expires_at = datetime.now(UTC) - timedelta(seconds=1)
     db.flush()
-    response = client.post(url, headers={"Authorization": "Bearer s3cret"})
+    response = client.get(url, headers={"Authorization": "Bearer s3cret"})  # as Vercel Cron does
     assert response.json() == {"expired": 1}
 
 

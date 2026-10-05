@@ -10,6 +10,7 @@
     "@react-three/drei": "^9.111.4",
     "@react-three/fiber": "^8.17.6",
     "@reduxjs/toolkit": "^2.2.5",
+    "qrcode": "^1.5.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-easy-crop": "^6.2.3",

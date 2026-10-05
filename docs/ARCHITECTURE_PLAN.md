@@ -537,6 +537,13 @@ Auth column: Public / Customer (any logged-in user) / Admin (`role=ADMIN`; futur
 | POST `/cart/merge` | Customer | `{items:[{variant_id, quantity}]}` (guest cart, ≤ 50) → `Cart + adjusted_variant_ids` | sums, then clamps to 10 and to stock; drops colours no longer sold; keeps out-of-stock ones (shown as such); called right after sign-in |
 | POST `/cart/preview` | Public | `{items:[{variant_id, quantity}]}` → priced Cart | lets guests see real prices without a server cart; unknown ids and never-published products are left out |
 
+### Payments before Razorpay (built in Phase 8)
+Until Razorpay is approved, two ways to pay, both confirmed by staff:
+- **UPI to the shop's own UPI ID** (home delivery). The order holds stock for `upi_payment_window_minutes`. The order page shows a `upi://pay` link and QR code with the exact amount and the order number as the note. The customer reports the UPI reference (`POST /orders/{n}/payment` → `payment_status=VERIFYING`; no expiry after that). Staff confirm in the admin (`confirm-payment` → stock sold, CONFIRMED) or reject it (cancel, stock released).
+- **Pay at store** (pickup from a chosen store). Stock is held for `pickup_hold_days`; staff press **Collected and paid** (CONFIRMED → DELIVERED).
+
+Settings (UPI ID, payee name, windows, delivery fee, stores, new-order email) live in `store_settings` and are edited at Admin → Settings. The default UPI ID is a placeholder that can't receive money. Cart line routes are keyed by `variant_id`. A "price changed" check happens at `POST /orders` (`expected_total_paise`), not in the cart. Unpaid orders expire lazily (checkout, order pages, admin lists) and via Vercel Cron (`GET /internal/expire-orders`, `CRON_SECRET`). Payments use `provider=MANUAL`; a confirmed UPI reference is stored as `provider_payment_id`, which is unique, so one payment can't confirm two orders.
+
 ### Checkout & orders (customer)
 | Method & URL | Auth | Request → Response | Validation / errors |
 |---|---|---|---|

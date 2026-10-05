@@ -94,7 +94,8 @@ def cancel_order(
 internal_router = APIRouter(prefix="/internal", tags=["internal"], include_in_schema=False)
 
 
-@internal_router.post("/expire-orders")
+# Vercel Cron calls with GET; POST is handy by hand.
+@internal_router.api_route("/expire-orders", methods=["GET", "POST"])
 def expire_orders(
     db: DbSession, authorization: Annotated[str | None, Header()] = None
 ) -> dict[str, int]:

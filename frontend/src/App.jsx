@@ -27,6 +27,9 @@ const AccountLayout = lazy(() => import("./Components/Account/AccountLayout"));
 const ProfilePage = lazy(() => import("./Components/Account/ProfilePage"));
 const AddressesPage = lazy(() => import("./Components/Account/AddressesPage"));
 const SecurityPage = lazy(() => import("./Components/Account/SecurityPage"));
+const OrdersPage = lazy(() => import("./Components/Account/OrdersPage"));
+const CheckoutPage = lazy(() => import("./Components/Checkout/CheckoutPage"));
+const OrderPage = lazy(() => import("./Components/Orders/OrderPage"));
 // Separate bundle; downloaded only when an admin opens /admin.
 const AdminApp = lazy(() => import("./Admin/AdminApp"));
 const LegalPage = lazy(() => import("./Components/Terms/LegalPage"));
@@ -78,7 +81,24 @@ const Shell = () => {
               <Route index element={<ProfilePage />} />
               <Route path="addresses" element={<AddressesPage />} />
               <Route path="security" element={<SecurityPage />} />
+              <Route path="orders" element={<OrdersPage />} />
             </Route>
+            <Route
+              path="/checkout"
+              element={
+                <RequireAuth>
+                  <CheckoutPage />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/orders/:orderNumber"
+              element={
+                <RequireAuth>
+                  <OrderPage />
+                </RequireAuth>
+              }
+            />
             {/* Old links */}
             <Route path="/loginSignUp" element={<Navigate to="/login" replace />} />
             <Route path="/resetPassword" element={<Navigate to="/forgot-password" replace />} />

@@ -87,9 +87,11 @@ const AddressForm = ({ address, defaultName, onSave, onCancel, saving, error }) 
       </div>
       <div className="formActions">
         <SubmitButton loading={saving}>Save address</SubmitButton>
-        <button type="button" className="secondaryButton" onClick={onCancel}>
-          Cancel
-        </button>
+        {onCancel && (
+          <button type="button" className="secondaryButton" onClick={onCancel}>
+            Cancel
+          </button>
+        )}
       </div>
     </form>
   );
